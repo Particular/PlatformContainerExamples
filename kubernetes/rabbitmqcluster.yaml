@@ -1,0 +1,9 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+  namespace: particular-platform-example
+  annotations:
+    rabbitmq.com/topology-allowed-namespaces: "particular-platform-example"
+spec:
+  replicas: 1

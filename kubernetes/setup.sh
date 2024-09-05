@@ -4,3 +4,12 @@ cd $0;
 
 ## Create the example namespace
 kubectl apply -f ./namespace.yaml
+
+## Setup RabbitMQ operator
+kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml
+
+## Create the RabbitMQ instance and wait until it is up
+kubectl apply -f ./rabbitmqcluster.yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Running pod/servicebus-server-0
+
+#https://www.rabbitmq.com/docs/man/rabbitmq-diagnostics.8
