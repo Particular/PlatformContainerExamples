@@ -17,6 +17,7 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  # WARNING: A single database container should not be shared between multiple ServiceControl instances in production scenarios.
   servicecontrol-db:
     image: particular/servicecontrol-ravendb:${SERVICECONTROL_TAG}
     ports:
