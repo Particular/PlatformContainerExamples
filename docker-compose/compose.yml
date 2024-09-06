@@ -45,8 +45,6 @@ services:
     image: particular/servicecontrol-monitoring:${SERVICECONTROL_TAG}
     env_file: .env
     restart: unless-stopped
-    environment:
-      - MONITORING_LOGLEVEL=Debug
     command: --setup-and-run
     ports:
       - "33633:33633"
