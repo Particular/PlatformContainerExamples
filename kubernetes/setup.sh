@@ -19,3 +19,4 @@ kubectl create configmap transport-config --from-env-file=./transport-config.env
 
 ## Install the platform components
 kubectl apply -f ./servicecontrol-monitoring.deployment.yaml
+kubectl apply -f ./servicecontrol-audit.deployment.yaml
