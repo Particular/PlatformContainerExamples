@@ -22,3 +22,7 @@ kubectl apply -f ./servicecontrol-monitoring.deployment.yaml
 kubectl apply -f ./servicecontrol-audit.deployment.yaml
 kubectl apply -f ./servicecontrol-error.deployment.yaml
 kubectl apply -f ./servicepulse.deployment.yaml
+
+## Wait for the ingress to be ready and apply our config
+kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=120s
+kubectl apply -f ./ingress.yaml

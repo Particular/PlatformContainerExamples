@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress  
+metadata:
+  name: ingress
+  namespace: particular-platform-example
+spec:
+  rules:
+  - http:
+      paths:
+      - servicepulse:
+          serviceName: servicepulse-service
+          servicePort: 9090
+        path: /
+      - ravendb-console-error:
+          serviceName: servicecontrol-error-service
+          servicePort: 8080
+        path: /ravendb/error
+      - ravendb-console-audit:
+          serviceName: servicecontrol-audit-service
+          servicePort: 8080
+        path: /ravendb/audit
