@@ -10,22 +10,17 @@ kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/do
 
 ## Create the RabbitMQ instance and wait until it is up
 kubectl apply -f ./rabbitmqcluster.yaml
-kubectl wait --for=jsonpath='{.status.phase}'=Running pod/servicebus-server-0
-
-#https://www.rabbitmq.com/docs/man/rabbitmq-diagnostics.8\
-
-## Load the transport configuration values into a configmap
-kubectl create configmap transport-config --from-env-file=./transport-config.env
+##kubectl wait --for=jsonpath='{.status.phase}'=Running pod/rabbitmq-server-0 --namespace=particular-platform-example
 
 ## Apply the platform components
 kubectl apply -f ./servicecontrol-monitoring.deployment.yaml
-kubectl apply -f ./servicecontrol-audit.deployment.yaml
-kubectl apply -f ./servicecontrol-error.deployment.yaml
+kubectl apply -f ./servicecontrol-audit.statefulset.yaml
+kubectl apply -f ./servicecontrol-error.statefulset.yaml
 kubectl apply -f ./servicepulse.deployment.yaml
 
 ## Create a basic auth password file and import it as a secret
-htpasswd -c .htpasswd foo bar
-kubectl create secret generic basic-auth --from-file=./.htpasswd
+htpasswd -bc .htpasswd foo bar
+kubectl create secret generic basic-auth --from-file=./.htpasswd --namespace=particular-platform-example
 rm -rf .htpasswd
 
 ## Wait for the ingress controller to be ready
