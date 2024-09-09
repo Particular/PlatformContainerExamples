@@ -16,3 +16,6 @@ kubectl wait --for=jsonpath='{.status.phase}'=Running pod/servicebus-server-0
 
 ## Load the transport configuration values into a configmap
 kubectl create configmap transport-config --from-env-file=./transport-config.env
+
+## Install the platform components
+kubectl apply -f ./servicecontrol-monitoring.deployment.yaml
