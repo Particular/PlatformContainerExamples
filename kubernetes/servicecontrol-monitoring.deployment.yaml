@@ -8,7 +8,7 @@ metadata:
 spec:
   ports:
   - port: 33633
-    name: servicecontrol-monitoring-deployment
+    name: api
   clusterIP: None
   selector:
     app: particular-servicecontrol-monitoring
@@ -34,16 +34,25 @@ spec:
         - name: servicecontrol-monitoring
           image: particular/servicecontrol-monitoring:latest
           env:
+            - name: RABBITMQ_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: host
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: password
             - name: TRANSPORTTYPE
-              valueFrom:
-                configMapKeyRef:
-                  name: transport-config 
-                  key: TRANSPORTTYPE
+              value: "RabbitMQ.QuorumConventionalRouting"
             - name: CONNECTIONSTRING
-              valueFrom:
-                configMapKeyRef:
-                  name: transport-config 
-                  key: CONNECTIONSTRING
+              value: "Host=$(RABBITMQ_HOST);username=$(RABBITMQ_USERNAME);Password=$(RABBITMQ_PASSWORD)"
       initContainers:
         - name: init-servicecontrol-monitoring
           image: particular/servicecontrol-monitoring:latest

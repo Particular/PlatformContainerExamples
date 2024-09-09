@@ -8,15 +8,15 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: audit-http-api
+  - name: api
     port: 44444
     protocol: TCP
     targetPort: 44444
-  - name: ravendb-audit-http
+  - name: ravendb-http
     port: 8080
     protocol: TCP
     targetPort: 8080
-  - name: ravendb-audit-snmp
+  - name: ravendb-snmp
     port: 161
     protocol: TCP
     targetPort: 161
@@ -78,16 +78,25 @@ spec:
             containerPort: 44444
             protocol: TCP
           env:
+            - name: RABBITMQ_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: host
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: password
             - name: TRANSPORTTYPE
-              valueFrom:
-                configMapKeyRef:
-                  name: transport-config 
-                  key: TRANSPORTTYPE
+              value: "RabbitMQ.QuorumConventionalRouting"
             - name: CONNECTIONSTRING
-              valueFrom:
-                configMapKeyRef:
-                  name: transport-config
-                  key: CONNECTIONSTRING
+              value: "Host=$(RABBITMQ_HOST);username=$(RABBITMQ_USERNAME);Password=$(RABBITMQ_PASSWORD)"
             - name: RAVENDB_CONNECTIONSTRING
               value: http://localhost:8080
       initContainers:
