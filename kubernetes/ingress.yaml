@@ -1,25 +1,39 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress  
 metadata:
-  name: ingress
+  name: example-ingress
   namespace: particular-platform-example
   annotations:
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: basic-auth
     nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - foo'
 spec:
+  defaultBackend:
+    service:
+      name: servicepulse-service
+      port:
+        name: frontend
   rules:
   - http:
       paths:
-      - servicepulse:
-          serviceName: servicepulse-service
-          servicePort: 9090
-        path: /
-      - ravendb-console-error:
-          serviceName: servicecontrol-error-service
-          servicePort: 8080
-        path: /ravendb/error
-      - ravendb-console-audit:
-          serviceName: servicecontrol-audit-service
-          servicePort: 8080
-        path: /ravendb/audit
+      - path: /ravendb/error
+        pathType: Prefix
+        backend:
+          service:
+            name: servicecontrol-error-service
+            port:
+              name: ravendb-http
+      - path: /ravendb/audit
+        pathType: Prefix
+        backend:
+          service:
+            name: servicecontrol-audit-service
+            port:
+              name: ravendb-http
+      - path: /rabbitmq
+        pathType: Prefix
+        backend:
+          service:
+            name: rabbitmq
+            port:
+              name: management
