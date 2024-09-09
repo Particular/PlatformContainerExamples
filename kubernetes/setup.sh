@@ -12,4 +12,7 @@ kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/do
 kubectl apply -f ./rabbitmqcluster.yaml
 kubectl wait --for=jsonpath='{.status.phase}'=Running pod/servicebus-server-0
 
-#https://www.rabbitmq.com/docs/man/rabbitmq-diagnostics.8
+#https://www.rabbitmq.com/docs/man/rabbitmq-diagnostics.8\
+
+## Load the transport configuration values into a configmap
+kubectl create configmap transport-config --from-env-file=./transport-config.env
