@@ -1,5 +1,5 @@
 {
-	"name": "Basic Kubernetes Example",	
+	"name": "Example dev container",	
 
 	"image": "mcr.microsoft.com/devcontainers/base:bullseye",
 
@@ -14,8 +14,6 @@
 			"minikube": "latest"
 		}
 	},
-	
-	"forwardPorts": [80],
 
 	"customizations": {
 		"vscode": {
