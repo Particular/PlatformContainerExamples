@@ -45,9 +45,15 @@ This example was created and tested using [Minikube-in-Docker](https://github.co
 
 All of the resources in this example are applied to the `particular-platform-example` namespace.
 
-### RabbitMQ
+### RabbitMQ broker
 
-RabbitMQ, using conventional routing and quorum queues is used as the transport in this example. The RabbitMQ instance is deployed to the cluster using the [RabbitMQ Kubernetes Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview). The default host, user, and password secrets created by the operator are used to generate [the transport connection string](https://docs.particular.net/transports/rabbitmq/connection-settings#transport-layer-security-support) using a [dependent environment variable](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/).
+The RabbitMQ instance is deployed to the cluster using the [RabbitMQ Kubernetes Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview). 
+
+### RabbitMQ Transport
+
+RabbitMQ, using conventional routing and quorum queues, is used as the transport in this example. 
+
+The default host, user, and password secrets created by the operator are used to generate [the transport connection string](https://docs.particular.net/transports/rabbitmq/connection-settings#transport-layer-security-support) using a [dependent environment variable](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/).
 
 ### ServiceControl Error and ServiceControl Audit
 
