@@ -3,16 +3,7 @@ kind: Ingress
 metadata:
   name: example-ingress
   namespace: particular-platform-example
-  annotations:
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: basic-auth
-    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - foo'
 spec:
-  defaultBackend:
-    service:
-      name: servicepulse-service
-      port:
-        name: frontend
   rules:
   - http:
       paths:
@@ -37,3 +28,10 @@ spec:
             name: rabbitmq
             port:
               name: management
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: servicepulse-service
+            port:
+              name: frontend
