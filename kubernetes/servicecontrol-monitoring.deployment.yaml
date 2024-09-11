@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: servicecontrol-monitoring-service
+  namespace: particular-platform-example
+  labels:
+    app: particular-servicecontrol-monitoring
+spec:
+  ports:
+  - port: 33633
+    name: api
+  clusterIP: None
+  selector:
+    app: particular-servicecontrol-monitoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servicecontrol-monitoring-deployment
+  namespace: particular-platform-example
+  labels:
+    app: particular-servicecontrol-monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: particular-servicecontrol-monitoring
+  template:
+    metadata:
+      labels:
+        app: particular-servicecontrol-monitoring
+    spec:
+      containers:
+        - name: servicecontrol-monitoring
+          image: particular/servicecontrol-monitoring:latest
+          env:
+            - name: RABBITMQ_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: host
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: password
+            - name: TRANSPORTTYPE
+              value: "RabbitMQ.QuorumConventionalRouting"
+            - name: CONNECTIONSTRING
+              value: "Host=$(RABBITMQ_HOST);username=$(RABBITMQ_USERNAME);Password=$(RABBITMQ_PASSWORD);"
+      initContainers:
+        - name: init-servicecontrol-monitoring
+          image: particular/servicecontrol-monitoring:latest
+          args: ['--setup']
+          env:
+            - name: RABBITMQ_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: host
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-default-user
+                  key: password
+            - name: TRANSPORTTYPE
+              value: "RabbitMQ.QuorumConventionalRouting"
+            - name: CONNECTIONSTRING
+              value: "Host=$(RABBITMQ_HOST);username=$(RABBITMQ_USERNAME);Password=$(RABBITMQ_PASSWORD);"

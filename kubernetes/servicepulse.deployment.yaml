@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: servicepulse-service
+  namespace: particular-platform-example
+  labels:
+    app: particular-servicepulse
+spec:
+  ports:
+  - port: 9090
+    name: frontend
+  clusterIP: None
+  selector:
+    app: particular-servicepulse
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servicepulse-deployment
+  namespace: particular-platform-example
+  labels:
+    app: particular-servicepulse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: particular-servicepulse
+  template:
+    metadata:
+      labels:
+        app: particular-servicepulse
+    spec:
+      containers:  
+      - name: servicepulse
+        image: particular/servicepulse:latest
+        env:
+          - name: SERVICECONTROL_URL
+            value: "http://servicecontrol-error-service:33333"
+          - name: MONITORING_URL
+            value: "http://servicecontrol-monitoring-service:33633"
