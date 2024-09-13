@@ -14,7 +14,7 @@ Running ServiceControl and ServicePulse locally in containers provides a way to 
 
 **Start the Containers:** After pulling the latest images, modify the [environment file](.env), if necessary, and then start up the containers using:
 ```shell
-docker-compose up
+docker-compose up -d
 ```
 
 Once composed:
