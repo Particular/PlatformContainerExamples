@@ -71,7 +71,7 @@ spec:
     spec:
       containers:
         - name: servicecontrol-audit
-          image: particular/servicecontrol:latest
+          image: particular/servicecontrol-audit:latest
           imagePullPolicy: Always
           ports:
           - name: api
@@ -118,7 +118,7 @@ spec:
           image: curlimages/curl:latest
           command: ['curl', '-o', 'ping.json', 'http://localhost:8080/admin/debug/node/ping']
         - name: init-servicecontrol-audit
-          image: particular/servicecontrol:latest
+          image: particular/servicecontrol-audit:latest
           args: ['--setup']
           env:
             - name: RABBITMQ_HOST
