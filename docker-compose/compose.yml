@@ -82,4 +82,4 @@ services:
       start_interval: 5s
       retries: 3
     volumes:
-      - ./volumes/rabbitmq-data:/var/lib/rabbitmq
+      - ./volumes/rabbitmq-data:/var/lib/rabbitmq/mnesia
