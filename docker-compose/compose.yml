@@ -75,11 +75,11 @@ services:
       - "15672:15672"
     restart: unless-stopped
     healthcheck:
-      test: rabbitmq-diagnostics -q ping
+      test: rabbitmq-diagnostics check_port_connectivity
       interval: 30s
       timeout: 10s
       start_period: 30s
-      start_interval: 5s
+      start_interval: 10s
       retries: 3
     volumes:
-      - ./volumes/rabbitmq-data:/var/lib/rabbitmq
+      - ./volumes/rabbitmq-data:/var/lib/rabbitmq/mnesia
