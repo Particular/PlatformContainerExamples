@@ -23,8 +23,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./volumes/db-data:/opt/RavenDB/Server/RavenData
-      - ./volumes/db-config:/opt/RavenDB/config
+      - raven-config:/opt/RavenDB/config
+      - raven-data:/opt/RavenDB/Server/RavenData
 
   servicecontrol-audit:
     image: particular/servicecontrol-audit:${SERVICECONTROL_TAG}
@@ -82,4 +82,9 @@ services:
       start_interval: 10s
       retries: 3
     volumes:
-      - ./volumes/rabbitmq-data:/var/lib/rabbitmq/mnesia
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq-data:
+  raven-config:
+  raven-data:
