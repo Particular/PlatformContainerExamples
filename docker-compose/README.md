@@ -6,8 +6,13 @@ Running ServiceControl and ServicePulse locally in containers provides a way to 
 
 ## Usage
 
-Modify the [environment file](.env), if necessary, and then start up the containers using:
+ **Pull the latest images:** Before running the containers, ensure you're using the latest version of each image by executing the following command:
+ ```shell
+ docker compose pull
+ ```
+ This command checks for any updates to the images specified in the docker-compose.yml file and pulls them if available.
 
+**Start the containers:** After pulling the latest images, modify the [environment file](.env), if necessary, and then start up the containers using:
 ```shell
 docker compose up -d
 ```
