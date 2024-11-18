@@ -29,6 +29,6 @@ Once composed:
   * `44444`: Audit API
   * `33633`: Monitoring API
   * `8080`: Database backend
-  * `9090` ServiceInsight UI
+  * `9090` ServicePulse UI
 * One instance of the [`servicecontrol-ravendb` container](https://docs.particular.net/servicecontrol/ravendb/containers) is used for both the [`servicecontrol`](https://docs.particular.net/servicecontrol/servicecontrol-instances/deployment/containers) and [`servicecontrol-audit`](https://docs.particular.net/servicecontrol/audit-instances/deployment/containers) containers.
   * _A single database container should not be shared between multiple ServiceControl instances in production scenarios._
