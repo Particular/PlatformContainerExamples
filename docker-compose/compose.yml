@@ -23,8 +23,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - raven-config:/opt/RavenDB/config
-      - raven-data:/opt/RavenDB/Server/RavenData
+      - raven-config:/var/lib/ravendb/config
+      - raven-data:/var/lib/ravendb/data
 
   servicecontrol-audit:
     image: particular/servicecontrol-audit:${SERVICECONTROL_TAG}
