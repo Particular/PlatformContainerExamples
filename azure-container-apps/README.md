@@ -4,6 +4,9 @@ This [Bicep file](https://learn.microsoft.com/en-us/azure/azure-resource-manager
 
 This can be used as a starting point for a deployment script, but should not be used as-is.
 
+> [!WARNING]
+> RavenDB [does not support NFS-based file storage](https://ravendb.net/docs/article-page/6.2/csharp/start/installation/running-in-docker-container#requirements), which is the only type of storage that can be mounted to containers using Azure Container Apps. [RavenDB Cloud](https://ravendb.net/cloud) is another option for Azure Container Apps hosted ServiceControl containers.
+
 ## Usage
 
 ```pwsh
