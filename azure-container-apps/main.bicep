@@ -240,7 +240,9 @@ resource audit 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.5')
             memory: '1Gi'
           }
-          env: CommonEnvVars
+          env: concat(CommonEnvVars, [
+            { name: 'ServiceControlQueueAddress', value: 'Particular.ServiceControl' }
+          ])
         }
       ]
       scale: singleReplica
