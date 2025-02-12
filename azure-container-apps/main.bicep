@@ -241,7 +241,7 @@ resource audit 'Microsoft.App/containerApps@2024-03-01' = {
             memory: '1Gi'
           }
           env: concat(CommonEnvVars, [
-            { name: 'ServiceControlQueueAddress', value: 'Particular.ServiceControl' }
+            { name: 'SERVICECONTROLQUEUEADDRESS', value: 'Particular.ServiceControl' }
           ])
         }
       ]
