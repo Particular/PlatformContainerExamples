@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "particular.pulse.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "particular.pulse.labels" . | nindent 4 }}
+  {{- with $.Values.pulse.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $.Values.pulse.service.type }}
+  ports:
+    - name: web
+      port: {{ $.Values.pulse.service.port }}
+      protocol: TCP
+      targetPort: 9090
+  selector:
+    {{- include "particular.pulse.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: particular-platform
+description: This chart install the Particular Platform components including ServiceControl, ServicePulse.
+type: application
+version: 0.1.0
+icon: https://particular.net/images/common/logo.svg
+home: https://particular.net/

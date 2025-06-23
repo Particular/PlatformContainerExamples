@@ -1,0 +1,25 @@
+{{- if .Values.audit.enabled -}}
+{{- range $instance := include "particular.audit.instances" . | fromYamlArray }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $instance }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "particular.audit.labels" $ | nindent 4 }}
+  {{- with $.Values.audit.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $.Values.audit.service.type }}
+  ports:
+    - name: api
+      port: {{ $.Values.audit.service.port }}
+      protocol: TCP
+      targetPort: 44444
+  selector:
+    {{- include "particular.audit.selectorLabels" $ | nindent 4 }}
+---
+{{- end }}
+{{- end -}}

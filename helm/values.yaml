@@ -1,0 +1,412 @@
+# Default values for particular-platform.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  # This sets the global pull policy for images.
+  pullPolicy: Always
+
+# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+transport:
+  # This is the connection string for the transport, more information can be found here: https://docs.particular.net/servicecontrol/transports
+  connectionString: ""
+  # This is the type of transport to use, more information can be found here: https://docs.particular.net/servicecontrol/transports
+  type: ""
+
+ravenDBUrl: ""
+licenseData: ""
+
+pulse:
+  image:
+    # This is the image to use for the pulse instances.
+    repository: particular/servicepulse
+    # Overrides the image tag whose default is latest.
+    tag: ""
+
+  # -- Node selector labels for scheduling the particular.pulse pod.
+  nodeSelector: {}
+
+  # -- Affinity settings for scheduling the particular.pulse pod. If an explicit label selector is not provided for pod affinity or pod anti-affinity one will be created from the pod selector labels.
+  affinity: {}
+
+  # -- Topology spread constraints for scheduling for the particular.pulse pod. If an explicit label selector is not provided one will be created from the pod selector labels.
+  topologySpreadConstraints: []
+
+  # -- Node taints the particular.pulse pod will tolerate for scheduling.
+  tolerations: []
+
+  # -- Update strategy for the particular.pulse stateful set.
+  updateStrategy: {}
+
+  # -- Labels to add to the particular.pulse pod.
+  podLabels: {}
+
+  # -- Annotations to add to the particular.pulse pod.
+  podAnnotations: {}
+
+  # -- Extra environment variables to add to the pulse container, more information can be found here: https://docs.particular.net/servicecontrol/audit-instances/configuration
+  extraEnv: {}
+
+  # -- Security context for the particular.pulse pod.
+  podSecurityContext:
+
+  # -- Liveness probe configuration for the particular.pulse pod default container.
+  livenessProbe:
+    httpGet:
+      path: "/"
+      port: 9090
+      scheme: HTTP
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 4
+
+  # -- Readiness probe configuration for the particular.pulse pod default container.
+  readinessProbe:
+    httpGet:
+      path: "/"
+      port: 9090
+      scheme: HTTP
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 20
+
+  # -- Resources for the particular.pulse pod default container.
+  resources: {}
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Automatically mount a ServiceAccount's API credentials?
+    automount: true
+    # Annotations to add to the service account
+    annotations: {}
+    labels: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  service:
+    # Annotations to add to the service
+    annotations: {}
+    # The type of service to create, more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+    # Options are: ClusterIP, NodePort, LoadBalancer, ExternalName
+    type: "ClusterIP"
+    port: 9090
+
+  # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+  ingress:
+    create: false
+    host: "*"
+    className: ""
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+error:
+  image:
+    # This is the image to use for the error instances.
+    repository: particular/servicecontrol
+    # Overrides the image tag whose default is latest.
+    tag: ""
+
+  # -- Node selector labels for scheduling the particular.error pod.
+  nodeSelector: {}
+
+  # -- Affinity settings for scheduling the particular.error pod. If an explicit label selector is not provided for pod affinity or pod anti-affinity one will be created from the pod selector labels.
+  affinity: {}
+
+  # -- Topology spread constraints for scheduling for the particular.error pod. If an explicit label selector is not provided one will be created from the pod selector labels.
+  topologySpreadConstraints: []
+
+  # -- Node taints the particular.error pod will tolerate for scheduling.
+  tolerations: []
+
+  # -- Update strategy for the particular.error stateful set.
+  updateStrategy: {}
+
+  # -- Labels to add to the particular.error pod.
+  podLabels: {}
+
+  # -- Annotations to add to the particular.error pod.
+  podAnnotations: {}
+
+  # -- Extra environment variables to add to the error container, more information can be found here: https://docs.particular.net/servicecontrol/error-instances/configuration
+  extraEnv: {}
+
+  # -- Security context for the particular.error pod.
+  podSecurityContext:
+
+  # -- (string) Priority class name for the particular.error pod.
+  priorityClassName:
+
+  # -- (int) Termination grace period for the particular.error pod; in seconds.
+  terminationGracePeriodSeconds:
+
+  # -- Security context for the particular.error pod default container.
+  securityContext:
+
+  # -- Liveness probe configuration for the particular.error pod default container.
+  livenessProbe:
+    httpGet:
+      path: "/api"
+      port: 33333
+      scheme: HTTP
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 4
+
+  # -- Readiness probe configuration for the particular.error pod default container.
+  readinessProbe:
+    httpGet:
+      path: "/api"
+      port: 33333
+      scheme: HTTP
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 20
+
+  # -- Resources for the particular.error pod default container.
+  resources: {}
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Automatically mount a ServiceAccount's API credentials?
+    automount: true
+    # Annotations to add to the service account
+    annotations: {}
+    labels: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  service:
+    # Annotations to add to the service
+    annotations: {}
+    # The type of service to create, more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+    # Options are: ClusterIP, NodePort, LoadBalancer, ExternalName
+    type: "ClusterIP"
+    port: 33333
+
+  # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+  ingress:
+    create: false
+    className: ""
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+audit:
+  # This is to enable or disable the creation of audit instances.
+  enabled: true
+  # This sets the number of audit instance to create.
+  instances: 1
+
+  image:
+    # This is the image to use for the audit instances.
+    repository: particular/servicecontrol-audit
+    # Overrides the image tag whose default is latest.
+    tag: ""
+
+  # -- Node selector labels for scheduling the particular.audit pod.
+  nodeSelector: {}
+
+  # -- Affinity settings for scheduling the particular.audit pod. If an explicit label selector is not provided for pod affinity or pod anti-affinity one will be created from the pod selector labels.
+  affinity: {}
+
+  # -- Topology spread constraints for scheduling for the particular.audit pod. If an explicit label selector is not provided one will be created from the pod selector labels.
+  topologySpreadConstraints: []
+
+  # -- Node taints the particular.audit pod will tolerate for scheduling.
+  tolerations: []
+
+  # -- Update strategy for the particular.audit stateful set.
+  updateStrategy: {}
+
+  # -- Labels to add to the particular.audit pod.
+  podLabels: {}
+
+  # -- Annotations to add to the particular.audit pod.
+  podAnnotations: {}
+
+  # -- Extra environment variables to add to the audit container, more information can be found here: https://docs.particular.net/servicecontrol/audit-instances/configuration
+  extraEnv: {}
+
+  # -- Security context for the particular.audit pod.
+  podSecurityContext:
+
+  # -- (string) Priority class name for the particular.audit pod.
+  priorityClassName:
+
+  # -- (int) Termination grace period for the particular.audit pod; in seconds.
+  terminationGracePeriodSeconds:
+
+  # -- Security context for the particular.audit pod default container.
+  securityContext:
+
+  # -- Liveness probe configuration for the particular.audit pod default container.
+  livenessProbe:
+    httpGet:
+      path: "/api"
+      port: 44444
+      scheme: HTTP
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 4
+
+  # -- Readiness probe configuration for the particular.audit pod default container.
+  readinessProbe:
+    httpGet:
+      path: "/api"
+      port: 44444
+      scheme: HTTP
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 20
+
+  # -- Resources for the particular.audit pod default container.
+  resources: {}
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Automatically mount a ServiceAccount's API credentials?
+    automount: true
+    # Annotations to add to the service account
+    annotations: {}
+    labels: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  service:
+    # Annotations to add to the service
+    annotations: {}
+    # The type of service to create, more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+    # Options are: ClusterIP, NodePort, LoadBalancer, ExternalName
+    type: "ClusterIP"
+    port: 44444
+
+monitor:
+  # This is to enable or disable the creation of monitor instances.
+  enabled: true
+
+  image:
+    # This is the image to use for the monitor instances.
+    repository: particular/servicecontrol-monitoring
+    # Overrides the image tag whose default is latest.
+    tag: ""
+
+  # -- Node selector labels for scheduling the particular.monitor pod.
+  nodeSelector: {}
+
+  # -- Affinity settings for scheduling the particular.monitor pod. If an explicit label selector is not provided for pod affinity or pod anti-affinity one will be created from the pod selector labels.
+  affinity: {}
+
+  # -- Topology spread constraints for scheduling for the particular.monitor pod. If an explicit label selector is not provided one will be created from the pod selector labels.
+  topologySpreadConstraints: []
+
+  # -- Node taints the particular.monitor pod will tolerate for scheduling.
+  tolerations: []
+
+  # -- Update strategy for the particular.monitor stateful set.
+  updateStrategy: {}
+
+  # -- Labels to add to the particular.monitor pod.
+  podLabels: {}
+
+  # -- Annotations to add to the particular.monitor pod.
+  podAnnotations: {}
+
+  # -- Extra environment variables to add to the monitor container, more information can be found here: https://docs.particular.net/servicecontrol/audit-instances/configuration
+  extraEnv: {}
+
+  # -- Security context for the particular.monitor pod.
+  podSecurityContext:
+
+  # -- Liveness probe configuration for the particular.monitor pod default container.
+  livenessProbe:
+    httpGet:
+      path: "/"
+      port: 33633
+      scheme: HTTP
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 4
+
+  # -- Readiness probe configuration for the particular.monitor pod default container.
+  readinessProbe:
+    httpGet:
+      path: "/"
+      port: 33633
+      scheme: HTTP
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 20
+
+  # -- Resources for the particular.monitor pod default container.
+  resources: {}
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Automatically mount a ServiceAccount's API credentials?
+    automount: true
+    # Annotations to add to the service account
+    annotations: {}
+    labels: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  service:
+    # Annotations to add to the service
+    annotations: {}
+    # The type of service to create, more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+    # Options are: ClusterIP, NodePort, LoadBalancer, ExternalName
+    type: "ClusterIP"
+    port: 33633
+
+  # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+  ingress:
+    create: false
+    className: ""
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
