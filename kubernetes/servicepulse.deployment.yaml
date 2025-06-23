@@ -7,8 +7,8 @@ metadata:
     app: particular-servicepulse
 spec:
   ports:
-  - port: 9090
-    name: frontend
+    - port: 9090
+      name: frontend
   clusterIP: None
   selector:
     app: particular-servicepulse
@@ -30,11 +30,11 @@ spec:
       labels:
         app: particular-servicepulse
     spec:
-      containers:  
-      - name: servicepulse
-        image: particular/servicepulse:latest
-        env:
-          - name: SERVICECONTROL_URL
-            value: "http://servicecontrol-error-service:33333"
-          - name: MONITORING_URL
-            value: "http://servicecontrol-monitoring-service:33633"
+      containers:
+        - name: servicepulse
+          image: particular/servicepulse:latest
+          env:
+            - name: SERVICECONTROL_URL
+              value: "http://servicecontrol-error-service:33333"
+            - name: MONITORING_URL
+              value: "http://servicecontrol-monitoring-service:33633"

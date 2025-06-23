@@ -8,18 +8,18 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: api
-    port: 33333
-    protocol: TCP
-    targetPort: 33333
-  - name: ravendb-http
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
-  - name: ravendb-snmp
-    port: 161
-    protocol: TCP
-    targetPort: 161
+    - name: api
+      port: 33333
+      protocol: TCP
+      targetPort: 33333
+    - name: ravendb-http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: ravendb-snmp
+      port: 161
+      protocol: TCP
+      targetPort: 161
   selector:
     app: particular-servicecontrol-error
 ---
@@ -33,7 +33,7 @@ metadata:
 spec:
   storageClassName: error-db-local
   persistentVolumeReclaimPolicy: Retain
-  accessModes: [ "ReadWriteOnce"]
+  accessModes: ["ReadWriteOnce"]
   capacity:
     storage: 10Gi
   hostPath:
@@ -44,7 +44,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: servicecontrol-error-statefulset
-  namespace: particular-platform-example  
+  namespace: particular-platform-example
 spec:
   serviceName: servicecontrol-error-service
   replicas: 1
@@ -56,14 +56,14 @@ spec:
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: Retain
   volumeClaimTemplates:
-  - metadata:
-      name: error-db-data
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 10Gi
+    - metadata:
+        name: error-db-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
   template:
     metadata:
       labels:
@@ -74,9 +74,9 @@ spec:
           image: particular/servicecontrol:latest
           imagePullPolicy: Always
           ports:
-          - name: api
-            containerPort: 33333
-            protocol: TCP
+            - name: api
+              containerPort: 33333
+              protocol: TCP
           env:
             - name: RABBITMQ_HOST
               valueFrom:
@@ -107,21 +107,27 @@ spec:
           imagePullPolicy: Always
           restartPolicy: Always
           ports:
-          - name: ravendb-http
-            containerPort: 8080
-            protocol: TCP
-          - name: ravendb-snmp
-            containerPort: 161
-            protocol: TCP
+            - name: ravendb-http
+              containerPort: 8080
+              protocol: TCP
+            - name: ravendb-snmp
+              containerPort: 161
+              protocol: TCP
           volumeMounts:
-          - name: error-db-data
-            mountPath: /opt/RavenDB/Server/RavenData
+            - name: error-db-data
+              mountPath: /var/lib/ravendb/data
         - name: wait-for-ravendb
           image: curlimages/curl:latest
-          command: ['curl', '-o', 'ping.json', 'http://localhost:8080/admin/debug/node/ping']
+          command:
+            [
+              "curl",
+              "-o",
+              "ping.json",
+              "http://localhost:8080/admin/debug/node/ping",
+            ]
         - name: init-servicecontrol-error
           image: particular/servicecontrol:latest
-          args: ['--setup']
+          args: ["--setup"]
           env:
             - name: RABBITMQ_HOST
               valueFrom:

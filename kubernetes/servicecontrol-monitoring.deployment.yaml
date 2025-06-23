@@ -7,8 +7,8 @@ metadata:
     app: particular-servicecontrol-monitoring
 spec:
   ports:
-  - port: 33633
-    name: api
+    - port: 33633
+      name: api
   clusterIP: None
   selector:
     app: particular-servicecontrol-monitoring
@@ -56,7 +56,7 @@ spec:
       initContainers:
         - name: init-servicecontrol-monitoring
           image: particular/servicecontrol-monitoring:latest
-          args: ['--setup']
+          args: ["--setup"]
           env:
             - name: RABBITMQ_HOST
               valueFrom:

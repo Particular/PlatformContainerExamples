@@ -6,40 +6,48 @@ This can be used as a starting point for a Kubernetes deployment, but should not
 
 ## Usage using Minikube
 
+### Install minikube and enable ingress
+
 ```bash
 minikube start --memory=12Gb
-
 minikube addons enable ingress
+```
 
+### Run kustomize
+
+```bash
+kubectl apply -k .
+```
+
+or alternative
+
+```bash
 ## Create a namespace (particular-platform-example)
 kubectl apply -f namespace.yaml
-
 ## Apply a single instance RabbitMQ cluster by applying and using the RabbitMQ cluster operator
 kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml
 kubectl apply -f rabbitmqcluster.yaml
-
 ## Apply ServiceControl monitoring instance as a Deployment
 kubectl apply -f servicecontrol-monitoring.deployment.yaml
-
 ## Apply a ServiceControl auditing instance as a StatefulSet
 kubectl apply -f servicecontrol-audit.statefulset.yaml
-
 ## Apply a ServiceControl error instance as a StatefulSet
 kubectl apply -f servicecontrol-error.statefulset.yaml
-
 ## Apply ServicePulse as a Deployment
 kubectl apply -f servicepulse.deployment.yaml
-
 ## Apply an ingress to expose ServicePulse
 kubectl apply -f ingress.yaml
+```
 
-## Destroy the minikube cluster when you are done
+### Destroy the minikube cluster when you are done
+
+```bash
 minikube delete
 ```
 
 ## Implementation details
 
-This example was created and tested using [Minikube-in-Docker](https://github.com/devcontainers/templates/tree/main/src/kubernetes-helm-minikube) dev container. 
+This example was created and tested using [Minikube-in-Docker](https://github.com/devcontainers/templates/tree/main/src/kubernetes-helm-minikube) dev container.
 
 ### Namespace
 
@@ -47,21 +55,22 @@ All of the resources in this example are applied to the `particular-platform-exa
 
 ### RabbitMQ broker
 
-The RabbitMQ instance is deployed to the cluster using the [RabbitMQ Kubernetes Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview). 
+The RabbitMQ instance is deployed to the cluster using the [RabbitMQ Kubernetes Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview).
 
 ### RabbitMQ Transport
 
-RabbitMQ, using conventional routing and quorum queues, is used as the transport in this example. 
+RabbitMQ, using conventional routing and quorum queues, is used as the transport in this example.
 
 The default host, user, and password secrets created by the operator are used to generate [the transport connection string](https://docs.particular.net/transports/rabbitmq/connection-settings#transport-layer-security-support) using a [dependent environment variable](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/).
 
 ### ServiceControl Error and ServiceControl Audit
 
-ServiceControl Error and ServiceControl Audit are deployed as [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/), with the RavenDB instance deployed as [a sidecar container](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/) backed by a [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/). The error or auditing images are also run as [an init container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) with the `--setup` command line argument. This would allow the init to run with higher priviledges than the regular application container, but this is not demonstrated in this example. 
+ServiceControl Error and ServiceControl Audit are deployed as [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/), with the RavenDB instance deployed as [a sidecar container](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/) backed by a [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/). The error or auditing images are also run as [an init container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) with the `--setup` command line argument. This would allow the init to run with higher privileges than the regular application container, but this is not demonstrated in this example.
 
 > [!NOTE]
 > The above StatefulSets configuration prevents [ServiceControl maintenance mode](https://docs.particular.net/servicecontrol/ravendb/accessing-database#container-deployment) from being activated because there is an option to store a single container in a StatefulSets.
 > There are two options:
+>
 > - Change the StatefulSets configuration to split ServiceControl instances from RavenDB to be able to stop the ServiceControl instances and leave the RavenDB container running
 > - Keep everything as is in StatefulSets, and instead of using maintenance mode, disable message ingestion ([error](https://docs.particular.net/servicecontrol/servicecontrol-instances/configuration#recoverability-servicecontrolingesterrormessages) or [audit](https://docs.particular.net/servicecontrol/audit-instances/configuration#recoverability-servicecontrolingestauditmessages) messages) to allow accessing RavenDB while no messages are ingested
 
