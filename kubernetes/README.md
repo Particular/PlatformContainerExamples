@@ -6,34 +6,42 @@ This can be used as a starting point for a Kubernetes deployment, but should not
 
 ## Usage using Minikube
 
+### Install minikube and enable ingress
+
 ```bash
 minikube start --memory=12Gb
-
 minikube addons enable ingress
+```
 
+### Run kustomize
+
+```bash
+kubectl apply -k .
+```
+
+or alternative
+
+```bash
 ## Create a namespace (particular-platform-example)
 kubectl apply -f namespace.yaml
-
 ## Apply a single instance RabbitMQ cluster by applying and using the RabbitMQ cluster operator
 kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml
 kubectl apply -f rabbitmqcluster.yaml
-
 ## Apply ServiceControl monitoring instance as a Deployment
 kubectl apply -f servicecontrol-monitoring.deployment.yaml
-
 ## Apply a ServiceControl auditing instance as a StatefulSet
 kubectl apply -f servicecontrol-audit.statefulset.yaml
-
 ## Apply a ServiceControl error instance as a StatefulSet
 kubectl apply -f servicecontrol-error.statefulset.yaml
-
 ## Apply ServicePulse as a Deployment
 kubectl apply -f servicepulse.deployment.yaml
-
 ## Apply an ingress to expose ServicePulse
 kubectl apply -f ingress.yaml
+```
 
-## Destroy the minikube cluster when you are done
+### Destroy the minikube cluster when you are done
+
+```bash
 minikube delete
 ```
 
