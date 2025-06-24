@@ -68,7 +68,7 @@ The default host, user, and password secrets created by the operator are used to
 ServiceControl Error and ServiceControl Audit are deployed as [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/), with the RavenDB instance deployed as [a sidecar container](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/) backed by a [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/). The error or auditing images are also run as [an init container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) with the `--setup` command line argument. This would allow the init to run with higher privileges than the regular application container, but this is not demonstrated in this example.
 
 > [!NOTE]
-> The above StatefulSets configuration prevents [ServiceControl maintenance mode](https://docs.particular.net/servicecontrol/ravendb/accessing-database#container-deployment) from being activated because there is an option to store a single container in a StatefulSets.
+> The above StatefulSets configuration prevents [ServiceControl maintenance mode](https://docs.particular.net/servicecontrol/ravendb/accessing-database#container-deployment) from being activated because there is no option to stop individual containers within a StatefulSet - you can only stop the entire pod.
 > There are two options:
 >
 > - Change the StatefulSets configuration to split ServiceControl instances from RavenDB to be able to stop the ServiceControl instances and leave the RavenDB container running
