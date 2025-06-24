@@ -37,7 +37,7 @@ spec:
         - name: service-pulse
           image: {{ include "particular.pulse.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ["--setup-run"]
+          args: ["--setup-and-run"]
           env:
             - name: ENABLE_REVERSE_PROXY
               value: "true"

@@ -52,7 +52,7 @@ spec:
           {{- end }}
           image: {{ include "particular.error.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ["--setup-run"]
+          args: ["--setup-and-run"]
           env:
             - name: TRANSPORTTYPE
               value: {{ required "transport.type is required" .Values.transport.type | quote }}
