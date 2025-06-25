@@ -35,6 +35,10 @@ spec:
       {{- end }}
       containers:
         - name: service-pulse
+          {{- with .Values.pulse.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           image: {{ include "particular.pulse.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ["--setup-and-run"]

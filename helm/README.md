@@ -19,14 +19,14 @@ To install the chart just to have a look.
 This setup creates a `test-particular-platform` namespace.
 
 ```shell
-helm upgrade --install --generate-name --create-namespace --namespace test-particular-platform .
+helm install --generate-name --create-namespace --namespace test-particular-platform .
 ```
 
 To install the chart on a production environment.
 This setup creates a `particular-platform` namespace and adds the license to the chart and also references an extra values override file for extra customization.
 
 ```shell
-helm upgrade --install --generate-name --create-namespace --namespace particular-platform -f <path to values overrides yaml file> --set-file licenseData=<path to license file>/license.xml .
+helm install --generate-name --create-namespace --namespace particular-platform -f <path to values overrides yaml file> --set-file licenseData=<path to license file>/license.xml .
 ```
 
 Example of a values_override.yaml file

@@ -55,6 +55,11 @@ pulse:
 
   # -- Security context for the particular.pulse pod.
   podSecurityContext:
+    runAsNonRoot: true
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
 
   # -- Liveness probe configuration for the particular.pulse pod default container.
   livenessProbe:
@@ -150,6 +155,7 @@ error:
 
   # -- Security context for the particular.error pod.
   podSecurityContext:
+    runAsNonRoot: true
 
   # -- (string) Priority class name for the particular.error pod.
   priorityClassName:
@@ -159,6 +165,7 @@ error:
 
   # -- Security context for the particular.error pod default container.
   securityContext:
+    allowPrivilegeEscalation: false
 
   # -- Liveness probe configuration for the particular.error pod default container.
   livenessProbe:
@@ -258,6 +265,7 @@ audit:
 
   # -- Security context for the particular.audit pod.
   podSecurityContext:
+    runAsNonRoot: true
 
   # -- (string) Priority class name for the particular.audit pod.
   priorityClassName:
@@ -267,6 +275,7 @@ audit:
 
   # -- Security context for the particular.audit pod default container.
   securityContext:
+    allowPrivilegeEscalation: false
 
   # -- Liveness probe configuration for the particular.audit pod default container.
   livenessProbe:
@@ -351,6 +360,10 @@ monitor:
 
   # -- Security context for the particular.monitor pod.
   podSecurityContext:
+    runAsNonRoot: true
+
+  securityContext:
+    allowPrivilegeEscalation: false
 
   # -- Liveness probe configuration for the particular.monitor pod default container.
   livenessProbe:

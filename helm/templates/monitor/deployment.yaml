@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "particular.monitor.fullname" . }}
-  namespace: {{ $.Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "particular.monitor.labels" . | nindent 4 }}
 spec:
@@ -14,27 +14,31 @@ spec:
     metadata:
       labels:
         {{- include "particular.monitor.selectorLabels" . | nindent 8 }}
-      {{- with $.Values.monitor.podLabels }}
+      {{- with .Values.monitor.podLabels }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if gt (len $.Values.monitor.podAnnotations) 0 }}
+      {{- if gt (len .Values.monitor.podAnnotations) 0 }}
       annotations:
-      {{- with $.Values.monitor.podAnnotations }}
+      {{- with .Values.monitor.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- end }}
     spec:
-      {{- with $.Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "particular.monitor.serviceAccountName" . }}
-      {{- with $.Values.monitor.podSecurityContext }}
+      {{- with .Values.monitor.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - name: servicecontrol-monitoring
+          {{- with .Values.monitor.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           image: {{ include "particular.monitor.image" . }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           args: ["--setup-and-run"]
@@ -43,11 +47,11 @@ spec:
               value: {{ required "transport.type is required" .Values.transport.type | quote }}
             - name: CONNECTIONSTRING
               value: {{ required "transport.connectionString is required" .Values.transport.connectionString | quote }}
-            {{- with $.Values.licenseData }}
+            {{- with .Values.licenseData }}
             - name: PARTICULARSOFTWARE_LICENSE
               value: {{ . | quote }}
             {{- end }}
-          {{- with $.Values.monitor.extraEnv }}
+          {{- with .Values.monitor.extraEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
           ports:
@@ -55,28 +59,28 @@ spec:
               containerPort: 33633
               protocol: TCP
           livenessProbe:
-            {{- toYaml $.Values.monitor.livenessProbe | nindent 12 }}
+            {{- toYaml .Values.monitor.livenessProbe | nindent 12 }}
           readinessProbe:
-            {{- toYaml $.Values.monitor.readinessProbe | nindent 12 }}
+            {{- toYaml .Values.monitor.readinessProbe | nindent 12 }}
           {{- with $.Values.monitor.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with $.Values.monitor.nodeSelector }}
+      {{- with .Values.monitor.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $.Values.monitor.affinity }}
+      {{- with .Values.monitor.affinity }}
       {{- $_ := include "particular.monitor.patchAffinity" . }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $.Values.monitor.topologySpreadConstraints }}
+      {{- with .Values.monitor.topologySpreadConstraints }}
       {{- $_ := include "particular.monitor.patchTopologySpreadConstraints" . }}
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $.Values.monitor.tolerations }}
+      {{- with .Values.monitor.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
