@@ -77,6 +77,7 @@ spec:
             - name: api
               containerPort: 44444
               protocol: TCP
+          args: ["--setup-and-run"]
           env:
             - name: RABBITMQ_HOST
               valueFrom:
@@ -114,37 +115,13 @@ spec:
           volumeMounts:
             - name: audit-db-data
               mountPath: /var/lib/ravendb/data
-        - name: wait-for-ravendb
-          image: curlimages/curl:latest
-          command:
-            [
-              "curl",
-              "-o",
-              "ping.json",
-              "http://localhost:8080/admin/debug/node/ping",
-            ]
-        - name: init-servicecontrol-audit
-          image: particular/servicecontrol-audit:latest
-          args: ["--setup"]
-          env:
-            - name: RABBITMQ_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: rabbitmq-default-user
-                  key: host
-            - name: RABBITMQ_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: rabbitmq-default-user
-                  key: username
-            - name: RABBITMQ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: rabbitmq-default-user
-                  key: password
-            - name: TRANSPORTTYPE
-              value: "RabbitMQ.QuorumConventionalRouting"
-            - name: CONNECTIONSTRING
-              value: "Host=$(RABBITMQ_HOST);username=$(RABBITMQ_USERNAME);Password=$(RABBITMQ_PASSWORD);"
-            - name: RAVENDB_CONNECTIONSTRING
-              value: http://localhost:8080
+          readinessProbe:
+            httpGet:
+              path: "/admin/debug/node/ping"
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 20
