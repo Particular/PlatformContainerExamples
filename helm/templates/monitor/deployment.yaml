@@ -35,10 +35,22 @@ spec:
       {{- end }}
       containers:
         - name: servicecontrol-monitoring
-          {{- with .Values.monitor.securityContext }}
           securityContext:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- if .Values.monitor.securityContext }}
+            {{- $securityContext := .Values.monitor.securityContext }}
+            {{- if .Values.licenseData }}
+            {{- $_ := set $securityContext "readOnlyRootFilesystem" true }}
+            {{- else }}
+            {{- $_ := set $securityContext "readOnlyRootFilesystem" false }}
+            {{- end }}
+            {{- toYaml $securityContext | nindent 12 }}
+            {{- else }}
+            {{- if .Values.licenseData }}
+            readOnlyRootFilesystem: true
+            {{- else }}
+            readOnlyRootFilesystem: false
+            {{- end }}
+            {{- end }}
           image: {{ include "particular.monitor.image" . }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           args: ["--setup-and-run"]

@@ -166,6 +166,7 @@ error:
   # -- Security context for the particular.error pod default container.
   securityContext:
     allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem is conditionally set in the template based on license availability
 
   # -- Liveness probe configuration for the particular.error pod default container.
   livenessProbe:
@@ -276,6 +277,7 @@ audit:
   # -- Security context for the particular.audit pod default container.
   securityContext:
     allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem is conditionally set in the template based on license availability
 
   # -- Liveness probe configuration for the particular.audit pod default container.
   livenessProbe:
@@ -364,6 +366,7 @@ monitor:
 
   securityContext:
     allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem is conditionally set in the template based on license availability
 
   # -- Liveness probe configuration for the particular.monitor pod default container.
   livenessProbe:
