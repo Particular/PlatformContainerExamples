@@ -67,10 +67,10 @@ Audit instances
 */}}
 {{- define "particular.error.auditInstances" -}}
 [
-{{- $instances := include "particular.audit.instances" . | fromYamlArray -}}
-{{- range $index, $instance := $instances -}}
+{{- range $index, $instance := .Values.audit.instances -}}
+{{- $instanceName := include "particular.audit.instanceName" (dict "suffix" $instance.suffix "context" $) -}}
 {{- if $index }}, {{ end -}}
-{ "api_uri": "http://{{ $instance }}:{{ $.Values.audit.service.port }}/api" }
+{ "api_uri": "http://{{ $instanceName }}:{{ $.Values.audit.service.port }}/api" }
 {{- end -}}
 ]
 {{- end }}

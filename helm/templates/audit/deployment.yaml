@@ -1,9 +1,10 @@
 {{- if .Values.audit.enabled -}}
-{{- range $index, $instance := include "particular.audit.instances" . | fromYamlArray }}
+{{- range $index, $instance := .Values.audit.instances }}
+{{- $instanceName := include "particular.audit.instanceName" (dict "suffix" $instance.suffix "context" $) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $instance }}
+  name: {{ $instanceName }}
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "particular.audit.labels" $ | nindent 4 }}
@@ -16,12 +17,12 @@ spec:
   selector:
     matchLabels:
       {{- include "particular.audit.selectorLabels" $ | nindent 6 }}
-      app.kubernetes.io/instance-name: {{ $instance }}
+      app.kubernetes.io/instance-name: {{ $instanceName }}
   template:
     metadata:
       labels:
         {{- include "particular.audit.selectorLabels" $ | nindent 8 }}
-        app.kubernetes.io/instance-name: {{ $instance }}
+        app.kubernetes.io/instance-name: {{ $instanceName }}
       {{- with $.Values.audit.podLabels }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -76,7 +77,11 @@ spec:
             - name: RAVENDB_CONNECTIONSTRING
               value: {{ required "ravenDBUrl is required" $.Values.ravenDBUrl | quote }}
             - name: RAVENDB_DATABASENAME
-              value: {{ printf "audit%d" $index | quote }}
+              value: {{ printf "audit-%s" $instance.suffix | quote }}
+            {{- if $instance.queue }}
+            - name: SERVICECONTROL_AUDIT_SERVICEBUS_AUDITQUEUE
+              value: {{ $instance.queue | quote }}
+            {{- end }}
             {{- with $.Values.licenseData }}
             - name: PARTICULARSOFTWARE_LICENSE
               value: {{ . | quote }}

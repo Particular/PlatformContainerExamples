@@ -41,8 +41,23 @@ transport:
 ravenDBUrl: "http://my-ravendb:8080"
 
 audit:
-  # the number of audit instances to provision
-  instances: 2
+  # Suffixed instances with dedicated queues:
+  instances:
+    - suffix: "sales"
+      queue: "sales.audit"
+    - suffix: "marketing"
+      queue: "marketing.audit"
+  # or
+  instances:
+    - suffix: "1"
+    - suffix: "2"
+
+  # or
+  instances:
+    - suffix: "1"
+    - suffix: "2"
+    - suffix: "3"
+      queue: "audit1" 
 
 pulse:
   service:

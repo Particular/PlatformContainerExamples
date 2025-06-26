@@ -1,9 +1,10 @@
 {{- if .Values.audit.enabled -}}
-{{- range $instance := include "particular.audit.instances" . | fromYamlArray }}
+{{- range $instance := .Values.audit.instances }}
+{{- $instanceName := include "particular.audit.instanceName" (dict "suffix" $instance.suffix "context" $) }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $instance }}
+  name: {{ $instanceName }}
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "particular.audit.labels" $ | nindent 4 }}
@@ -20,7 +21,7 @@ spec:
       targetPort: 44444
   selector:
     {{- include "particular.audit.selectorLabels" $ | nindent 4 }}
-    app.kubernetes.io/instance-name: {{ $instance }}
+    app.kubernetes.io/instance-name: {{ $instanceName }}
 ---
 {{- end }}
 {{- end -}}
