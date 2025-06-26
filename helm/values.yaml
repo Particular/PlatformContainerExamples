@@ -26,7 +26,7 @@ pulse:
   image:
     # This is the image to use for the pulse instances.
     repository: particular/servicepulse
-    # Overrides the image tag whose default is latest.
+    # Overrides the image tag whose default is service pulse version.
     tag: ""
 
   # -- Node selector labels for scheduling the particular.pulse pod.
@@ -126,7 +126,7 @@ error:
   image:
     # This is the image to use for the error instances.
     repository: particular/servicecontrol
-    # Overrides the image tag whose default is latest.
+    # Overrides the image tag whose default is app version.
     tag: ""
 
   # -- Node selector labels for scheduling the particular.error pod.
@@ -237,7 +237,7 @@ audit:
   image:
     # This is the image to use for the audit instances.
     repository: particular/servicecontrol-audit
-    # Overrides the image tag whose default is latest.
+    # Overrides the image tag whose default is app version.
     tag: ""
 
   # -- Node selector labels for scheduling the particular.audit pod.
@@ -333,7 +333,7 @@ monitor:
   image:
     # This is the image to use for the monitor instances.
     repository: particular/servicecontrol-monitoring
-    # Overrides the image tag whose default is latest.
+    # Overrides the image tag whose default is app version.
     tag: ""
 
   # -- Node selector labels for scheduling the particular.monitor pod.

@@ -58,7 +58,11 @@ Patch topology spread constraints
 The image to use
 */}}
 {{- define "particular.audit.image" -}}
-{{- printf "%s/%s:%s" .Values.image.registry .Values.audit.image.repository (default "latest" .Values.audit.image.tag) }}
+{{- $tag := .Values.audit.image.tag | default .Chart.AppVersion -}}
+{{- printf "%s/%s:%s" .Values.image.registry .Values.audit.image.repository $tag -}}
+{{- end }}
+
+{{/*
 {{- end }}
 
 {{/*

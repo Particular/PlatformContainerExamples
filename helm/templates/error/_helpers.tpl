@@ -58,7 +58,8 @@ Patch topology spread constraints
 The image to use
 */}}
 {{- define "particular.error.image" -}}
-{{- printf "%s/%s:%s" .Values.image.registry .Values.error.image.repository (default "latest" .Values.error.image.tag) }}
+{{- $tag := .Values.error.image.tag | default .Chart.AppVersion -}}
+{{- printf "%s/%s:%s" .Values.image.registry .Values.error.image.repository $tag -}}
 {{- end }}
 
 {{/*
