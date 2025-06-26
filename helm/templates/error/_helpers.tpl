@@ -66,9 +66,11 @@ The image to use
 Audit instances
 */}}
 {{- define "particular.error.auditInstances" -}}
-{{ print "[" }}
-{{- range include "particular.audit.instances" . | fromYamlArray }}
-{{ printf "{ \"api_uri\": \"http://%s:%s/api\" }" . ($.Values.audit.service.port | toString) }}
-{{- end }}
-{{ print "]" }}
+[
+{{- $instances := include "particular.audit.instances" . | fromYamlArray -}}
+{{- range $index, $instance := $instances -}}
+{{- if $index }}, {{ end -}}
+{ "api_uri": "http://{{ $instance }}:{{ $.Values.audit.service.port }}/api" }
+{{- end -}}
+]
 {{- end }}
