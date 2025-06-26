@@ -41,8 +41,8 @@ pulse:
   # -- Node taints the particular.pulse pod will tolerate for scheduling.
   tolerations: []
 
-  # -- Update strategy for the particular.pulse stateful set.
-  updateStrategy: {}
+  # -- Strategy for the particular.pulse deployment.
+  strategy: {}
 
   # -- Labels to add to the particular.pulse pod.
   podLabels: {}
@@ -141,8 +141,8 @@ error:
   # -- Node taints the particular.error pod will tolerate for scheduling.
   tolerations: []
 
-  # -- Update strategy for the particular.error stateful set.
-  updateStrategy: {}
+  # -- Strategy for the particular.error deployment.
+  strategy: {}
 
   # -- Labels to add to the particular.error pod.
   podLabels: {}
@@ -252,8 +252,8 @@ audit:
   # -- Node taints the particular.audit pod will tolerate for scheduling.
   tolerations: []
 
-  # -- Update strategy for the particular.audit stateful set.
-  updateStrategy: {}
+  # -- Strategy for the particular.audit deployment.
+  strategy: {}
 
   # -- Labels to add to the particular.audit pod.
   podLabels: {}
@@ -348,8 +348,8 @@ monitor:
   # -- Node taints the particular.monitor pod will tolerate for scheduling.
   tolerations: []
 
-  # -- Update strategy for the particular.monitor stateful set.
-  updateStrategy: {}
+  # -- Strateg for the particular.monitor deployment.
+  strategy: {}
 
   # -- Labels to add to the particular.monitor pod.
   podLabels: {}

@@ -20,6 +20,7 @@ spec:
       targetPort: 44444
   selector:
     {{- include "particular.audit.selectorLabels" $ | nindent 4 }}
+    app.kubernetes.io/instance-name: {{ $instance }}
 ---
 {{- end }}
 {{- end -}}

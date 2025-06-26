@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "particular.error.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "particular.error.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  {{- with .Values.error.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "particular.error.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "particular.error.selectorLabels" . | nindent 8 }}
+      {{- with .Values.error.podLabels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if gt (len .Values.error.podAnnotations) 0 }}
+      annotations:
+      {{- with .Values.error.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "particular.error.serviceAccountName" . }}
+      {{- with .Values.error.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.error.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
+      {{- with .Values.error.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ . }}
+      {{- end }}
+      containers:
+        - name: servicecontrol-error
+          securityContext:
+            {{- if .Values.error.securityContext }}
+            {{- $securityContext := .Values.error.securityContext }}
+            {{- if .Values.licenseData }}
+            {{- $_ := set $securityContext "readOnlyRootFilesystem" true }}
+            {{- else }}
+            {{- $_ := set $securityContext "readOnlyRootFilesystem" false }}
+            {{- end }}
+            {{- toYaml $securityContext | nindent 12 }}
+            {{- else }}
+            {{- if .Values.licenseData }}
+            readOnlyRootFilesystem: true
+            {{- else }}
+            readOnlyRootFilesystem: false
+            {{- end }}
+            {{- end }}
+          image: {{ include "particular.error.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["--setup-and-run"]
+          env:
+            - name: TRANSPORTTYPE
+              value: {{ required "transport.type is required" .Values.transport.type | quote }}
+            - name: CONNECTIONSTRING
+              value: {{ required "transport.connectionString is required" .Values.transport.connectionString | quote }}
+            - name: RAVENDB_CONNECTIONSTRING
+              value: {{ required "ravenDBUrl is required" .Values.ravenDBUrl | quote }}
+            - name: ALLOWMESSAGEEDITING
+              value: "true"
+            - name: SHOW_PENDING_RETRY
+              value: "true"
+            {{- with .Values.licenseData }}
+            - name: PARTICULARSOFTWARE_LICENSE
+              value: {{ . | quote }}
+            {{- end }}
+            - name: SERVICECONTROL_REMOTEINSTANCES
+              value: {{ include "particular.error.auditInstances" . | squote }}
+          {{- with .Values.error.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: api
+              containerPort: 33333
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.error.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.error.readinessProbe | nindent 12 }}
+          {{- with .Values.error.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.error.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.error.affinity }}
+      {{- $_ := include "particular.error.patchAffinity" . }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.error.topologySpreadConstraints }}
+      {{- $_ := include "particular.error.patchTopologySpreadConstraints" . }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.error.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
