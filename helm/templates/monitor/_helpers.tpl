@@ -58,5 +58,5 @@ Patch topology spread constraints
 The image to use
 */}}
 {{- define "particular.monitor.image" -}}
-{{- printf "%s:%s" .Values.monitor.image.repository (default "latest" .Values.monitor.image.tag) }}
+{{- printf "%s/%s:%s" .Values.image.registry .Values.monitor.image.repository (default "latest" .Values.monitor.image.tag) }}
 {{- end }}

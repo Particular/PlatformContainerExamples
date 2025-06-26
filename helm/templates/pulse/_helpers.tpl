@@ -58,5 +58,5 @@ Patch topology spread constraints
 The image to use
 */}}
 {{- define "particular.pulse.image" -}}
-{{- printf "%s:%s" .Values.pulse.image.repository (default "latest" .Values.pulse.image.tag) }}
+{{- printf "%s/%s:%s" .Values.image.registry .Values.pulse.image.repository (default "latest" .Values.pulse.image.tag) }}
 {{- end }}
