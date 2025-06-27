@@ -348,7 +348,7 @@ monitor:
   # -- Node taints the particular.monitor pod will tolerate for scheduling.
   tolerations: []
 
-  # -- Strateg for the particular.monitor deployment.
+  # -- Strategy for the particular.monitor deployment.
   strategy: {}
 
   # -- Labels to add to the particular.monitor pod.

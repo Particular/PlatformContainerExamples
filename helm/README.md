@@ -52,12 +52,12 @@ audit:
     - suffix: "1"
     - suffix: "2"
 
-  # or
+  # or a combination of default queue names and a custom one
   instances:
     - suffix: "1"
     - suffix: "2"
     - suffix: "3"
-      queue: "audit1" 
+      queue: "my_custom_queuename" 
 
 pulse:
   service:
