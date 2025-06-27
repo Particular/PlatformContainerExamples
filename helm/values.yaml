@@ -41,8 +41,8 @@ pulse:
   # -- Node taints the particular.pulse pod will tolerate for scheduling.
   tolerations: []
 
-  # -- Update strategy for the particular.pulse stateful set.
-  updateStrategy: {}
+  # -- Strategy for the particular.pulse deployment.
+  strategy: {}
 
   # -- Labels to add to the particular.pulse pod.
   podLabels: {}
@@ -141,8 +141,8 @@ error:
   # -- Node taints the particular.error pod will tolerate for scheduling.
   tolerations: []
 
-  # -- Update strategy for the particular.error stateful set.
-  updateStrategy: {}
+  # -- Strategy for the particular.error deployment.
+  strategy: {}
 
   # -- Labels to add to the particular.error pod.
   podLabels: {}
@@ -231,8 +231,21 @@ error:
 audit:
   # This is to enable or disable the creation of audit instances.
   enabled: true
-  # This sets the number of audit instance to create.
-  instances: 1
+  # Suffixed instances with dedicated queues:
+  # instances:
+  # - suffix: "sales"
+  #   queue: "sales.audit"
+  # - suffix: "marketing"
+  #   queue: "marketing.audit"
+  #
+  # or a combination of default queue names and a custom one
+  # instances:
+  #   - suffix: "1"
+  #   - suffix: "2"
+  #   - suffix: "3"
+  #     queue: "my_custom_queuename" 
+  instances: 
+     - suffix: "1"
 
   image:
     # This is the image to use for the audit instances.
@@ -252,8 +265,8 @@ audit:
   # -- Node taints the particular.audit pod will tolerate for scheduling.
   tolerations: []
 
-  # -- Update strategy for the particular.audit stateful set.
-  updateStrategy: {}
+  # -- Strategy for the particular.audit deployment.
+  strategy: {}
 
   # -- Labels to add to the particular.audit pod.
   podLabels: {}
@@ -348,8 +361,8 @@ monitor:
   # -- Node taints the particular.monitor pod will tolerate for scheduling.
   tolerations: []
 
-  # -- Update strategy for the particular.monitor stateful set.
-  updateStrategy: {}
+  # -- Strategy for the particular.monitor deployment.
+  strategy: {}
 
   # -- Labels to add to the particular.monitor pod.
   podLabels: {}

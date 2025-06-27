@@ -63,13 +63,19 @@ The image to use
 {{- end }}
 
 {{/*
+Generate instance name from suffix
+*/}}
+{{- define "particular.audit.instanceName" -}}
+{{- $suffix := .suffix -}}
+{{- $context := .context -}}
+{{- printf "%s-%s" (include "particular.audit.fullname" $context) $suffix -}}
 {{- end }}
 
 {{/*
-Instances
+Get all instance names as YAML list
 */}}
-{{- define "particular.audit.instances" -}}
-{{- range (until (.Values.audit.instances | int)) }}
-{{ printf "- %s-%s" (include "particular.audit.fullname" $) (toString .) }}
+{{- define "particular.audit.instanceNames" -}}
+{{- range .Values.audit.instances }}
+- {{ include "particular.audit.instanceName" (dict "suffix" .suffix "context" $) }}
 {{- end }}
 {{- end }}
