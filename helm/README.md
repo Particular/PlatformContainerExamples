@@ -47,10 +47,6 @@ audit:
       queue: "sales.audit"
     - suffix: "marketing"
       queue: "marketing.audit"
-  # or
-  instances:
-    - suffix: "1"
-    - suffix: "2"
 
   # or a combination of default queue names and a custom one
   instances:

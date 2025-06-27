@@ -79,7 +79,7 @@ spec:
             - name: RAVENDB_DATABASENAME
               value: {{ printf "audit-%s" $instance.suffix | quote }}
             {{- if $instance.queue }}
-            - name: SERVICECONTROL_AUDIT_SERVICEBUS_AUDITQUEUE
+            - name: SERVICEBUS_AUDITQUEUE
               value: {{ $instance.queue | quote }}
             {{- end }}
             {{- with $.Values.licenseData }}
