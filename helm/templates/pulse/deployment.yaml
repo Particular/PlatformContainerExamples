@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "particular.pulse.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "particular.pulse.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "particular.pulse.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "particular.pulse.selectorLabels" . | nindent 8 }}
+      {{- with .Values.pulse.podLabels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if gt (len .Values.pulse.podAnnotations) 0 }}
+      annotations:
+      {{- with .Values.pulse.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "particular.pulse.serviceAccountName" . }}
+      {{- with .Values.pulse.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: service-pulse
+          {{- with .Values.pulse.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "particular.pulse.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["--setup-and-run"]
+          env:
+            - name: ENABLE_REVERSE_PROXY
+              value: "true"
+            - name: SHOW_PENDING_RETRY
+              value: "false"
+            - name: SERVICECONTROL_URL
+              value: {{ printf "http://%s:%s" (include "particular.error.fullname" .) (.Values.error.service.port | toString) }}
+            - name: MONITORING_URL
+              value: {{ printf "http://%s:%s" (include "particular.monitor.fullname" .) (.Values.monitor.service.port | toString) }}
+          {{- with .Values.pulse.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: api
+              containerPort: 9090
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.pulse.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.pulse.readinessProbe | nindent 12 }}
+          {{- with .Values.pulse.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.pulse.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.pulse.affinity }}
+      {{- $_ := include "particular.pulse.patchAffinity" . }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.pulse.topologySpreadConstraints }}
+      {{- $_ := include "particular.pulse.patchTopologySpreadConstraints" . }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.pulse.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

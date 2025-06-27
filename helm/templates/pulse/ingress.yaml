@@ -1,0 +1,38 @@
+{{- if .Values.pulse.ingress.create -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "particular.pulse.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "particular.pulse.labels" . | nindent 4 }}
+  {{- with .Values.pulse.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.pulse.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if .Values.pulse.ingress.tls }}
+  tls:
+    {{- range .Values.pulse.ingress.tls }}
+    - hosts: 
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+  - http:
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: {{ include "particular.pulse.fullname" . }}
+              port:
+                name: api
+    host: {{ .Values.pulse.ingress.host | quote }}
+{{- end -}}

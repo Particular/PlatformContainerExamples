@@ -1,0 +1,22 @@
+{{- if .Values.monitor.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "particular.monitor.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "particular.monitor.labels" . | nindent 4 }}
+  {{- with $.Values.monitor.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $.Values.monitor.service.type }}
+  ports:
+    - name: api
+      port: {{ $.Values.monitor.service.port }}
+      protocol: TCP
+      targetPort: 33633
+  selector:
+    {{- include "particular.monitor.selectorLabels" . | nindent 4 }}
+{{- end -}}
