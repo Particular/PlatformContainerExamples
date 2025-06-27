@@ -29,7 +29,7 @@ This setup creates a `particular-platform` namespace and adds the license to the
 helm install --generate-name --create-namespace --namespace particular-platform -f <path to values overrides yaml file> --set-file licenseData=<path to license file>/license.xml .
 ```
 
-Example of a values_override.yaml file
+Example of a values_override.yaml file. For more options see [values.yaml](./values.yaml)
 
 ```yaml
 transport:
@@ -53,7 +53,17 @@ audit:
     - suffix: "1"
     - suffix: "2"
     - suffix: "3"
-      queue: "my_custom_queuename" 
+      queue: "my_custom_queuename"
+      
+  # it is also possible to override the ravenDBUrl
+    instances:
+    - suffix: "sales"
+      queue: "sales.audit"
+      ravenDBUrl: "http://ravendb-custom:8081"
+    - suffix: "marketing"
+      queue: "marketing.audit"
+      ravenDBUrl: "http://ravendb-custom:8082"
+
 
 pulse:
   service:

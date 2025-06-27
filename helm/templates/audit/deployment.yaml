@@ -75,7 +75,7 @@ spec:
             - name: CONNECTIONSTRING
               value: {{ required "transport.connectionString is required" $.Values.transport.connectionString | quote }}
             - name: RAVENDB_CONNECTIONSTRING
-              value: {{ required "ravenDBUrl is required" $.Values.ravenDBUrl | quote }}
+              value: {{ required "ravenDBUrl is required" (coalesce $instance.ravenDBUrl $.Values.audit.ravenDBUrl $.Values.ravenDBUrl) | quote }}
             - name: RAVENDB_DATABASENAME
               value: {{ printf "audit-%s" $instance.suffix | quote }}
             {{- if $instance.queue }}

@@ -70,7 +70,7 @@ spec:
             - name: CONNECTIONSTRING
               value: {{ required "transport.connectionString is required" .Values.transport.connectionString | quote }}
             - name: RAVENDB_CONNECTIONSTRING
-              value: {{ required "ravenDBUrl is required" .Values.ravenDBUrl | quote }}
+              value: {{ required "ravenDBUrl is required" (coalesce .Values.error.ravenDBUrl .Values.ravenDBUrl) | quote }}
             - name: ALLOWMESSAGEEDITING
               value: "true"
             - name: SHOW_PENDING_RETRY

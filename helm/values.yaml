@@ -153,6 +153,9 @@ error:
   # -- Extra environment variables to add to the error container, more information can be found here: https://docs.particular.net/servicecontrol/error-instances/configuration
   extraEnv: {}
 
+  # -- RavenDB connection URL for the error instance. If not set, the global ravenDBUrl will be used.
+  ravenDBUrl: ""
+
   # -- Security context for the particular.error pod.
   podSecurityContext:
     runAsNonRoot: true
@@ -231,19 +234,14 @@ error:
 audit:
   # This is to enable or disable the creation of audit instances.
   enabled: true
-  # Suffixed instances with dedicated queues:
+  # Format for the audit instances:
   # instances:
-  # - suffix: "sales"
-  #   queue: "sales.audit"
-  # - suffix: "marketing"
-  #   queue: "marketing.audit"
-  #
-  # or a combination of default queue names and a custom one
-  # instances:
-  #   - suffix: "1"
-  #   - suffix: "2"
-  #   - suffix: "3"
-  #     queue: "my_custom_queuename" 
+  #   - suffix: "suffix"
+  #     queue: "my_custom_queuename"
+  #     ravenDBUrl: "http://ravendb-custom:8080"
+  # Suffix is mandatory and is used to create a unique name for the audit instance.
+  # The ingestion queue is optional and if not set, the default queue name will be used.
+  # The ravenDBUrl is optional and if not set, the audit or the global ravenDBUrl will be used. 
   instances: 
      - suffix: "1"
 
@@ -276,6 +274,9 @@ audit:
 
   # -- Extra environment variables to add to the audit container, more information can be found here: https://docs.particular.net/servicecontrol/audit-instances/configuration
   extraEnv: {}
+
+  # -- RavenDB connection URL default for all audit instances. If not set, the global ravenDBUrl will be used.
+  ravenDBUrl: ""
 
   # -- Security context for the particular.audit pod.
   podSecurityContext:
