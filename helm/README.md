@@ -84,7 +84,7 @@ In this example we are enabling [Azure Disks CSI driver](https://learn.microsoft
 az aks update --name <cluster name> --resource-group <rg name> --enable-disk-driver
 ```
 
-Once that is completed, you can run apply the following manifest:
+Once that is completed, you can run apply the following manifest (make sure to tweak storage capacity to your needs and add [resource constraints](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) as needed):
 
 ```yaml
 apiVersion: apps/v1
