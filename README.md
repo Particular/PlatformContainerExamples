@@ -4,6 +4,6 @@ This repository contains examples of deploying the [Particular Service Platform]
 
 ## Examples
 
-* [Deploying to Azure Container Apps using Bicep](/azure-container-apps/)
-* [Running locally with Docker Compose](/docker-compose/)
-* [Deploying to a Kubernetes cluster](/kubernetes/)
+- [Deploying to Azure Container Apps using Bicep](/azure-container-apps/)
+- [Running locally with Docker Compose](/docker-compose/)
+- [Deploying to a Kubernetes cluster using helm](/helm/)
