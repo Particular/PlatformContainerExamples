@@ -79,7 +79,7 @@ spec:
             - name: PARTICULARSOFTWARE_LICENSE
               value: {{ . | quote }}
             {{- end }}
-            {{- if .Values.error.auditInstances }}
+            {{- if .Values.audit.instances }}
             - name: SERVICECONTROL_REMOTEINSTANCES
               value: {{ include "particular.error.auditInstances" . | squote }}
             {{- end }}  
