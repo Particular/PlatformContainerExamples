@@ -79,10 +79,8 @@ spec:
             - name: PARTICULARSOFTWARE_LICENSE
               value: {{ . | quote }}
             {{- end }}
-            {{- if .Values.audit.instances }}
             - name: SERVICECONTROL_REMOTEINSTANCES
               value: {{ include "particular.error.auditInstances" . | squote }}
-            {{- end }}  
           {{- with .Values.error.extraEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
