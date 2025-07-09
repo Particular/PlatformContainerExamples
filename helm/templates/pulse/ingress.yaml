@@ -33,6 +33,6 @@ spec:
             service:
               name: {{ include "particular.pulse.fullname" . }}
               port:
-                name: api
+                name: web
     host: {{ .Values.pulse.ingress.host | quote }}
 {{- end -}}
