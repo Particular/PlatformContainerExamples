@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>servicecontrol</Name>
+  <Repository>particular/servicecontrol:latest</Repository>
+  <Registry>https://hub.docker.com/r/particular/servicecontrol</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://discuss.particular.net/tag/servicecontrol</Support>
+  <Project>https://github.com/Particular/ServiceControl</Project>
+  <Overview>Particular Software ServiceControl&#xD;
+&#xD;
+The 'particular/servicecontrol' image is part of the Particular Service Platform, which includes the following images:&#xD;
+ - particular/servicecontrol-ravendb | The database used by the error/audit instances (https://docs.particular.net/servicecontrol/ravendb/containers)&#xD;
+ - particular/servicecontrol | The primary/error instance, which includes error handling and recoverability (https://docs.particular.net/servicecontrol/servicecontrol-instances/)&#xD;
+ - particular/servicecontrol-audit | The audit instance, which stores audit data, and can be scaled out to multiple audit instances (https://docs.particular.net/servicecontrol/audit-instances/)&#xD;
+ - particular/servicecontrol-monitoring | The monitoring instance, which tracks runtime information like throughput, queue length, and other metrics (https://docs.particular.net/servicecontrol/monitoring-instances/)&#xD;
+ - particular/servicepulse | The web application that provides a front end for recoverability and monitoring features (https://docs.particular.net/servicepulse/)&#xD;
+&#xD;
+Additional optional environment variables can be configured. See "https://docs.particular.net/servicecontrol/servicecontrol-instances/configuration".</Overview>
+  <Category>Tools: Status:Stable</Category>
+  <WebUI/>
+  <TemplateURL/>
+  <Icon>https://www.gravatar.com/avatar/4160e88ff57936ccec0dbaabc67b02f7?s=120&amp;amp;r=g&amp;amp;d=404</Icon>
+  <ExtraParams/>
+  <PostArgs>--setup-and-run</PostArgs>
+  <CPUset/>
+  <DateInstalled>1753682299</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>See "https://docs.particular.net/servicecontrol/servicecontrol-instances/deployment/containers" and "https://github.com/Particular/PlatformContainerExamples".</Requires>
+  <Config Name="RAVENDB_CONNECTIONSTRING" Target="RAVENDB_CONNECTIONSTRING" Default="http://servicecontrol-ravendb:8080" Mode="" Description="Provides the URL to connect to the database container that stores the instance's data. The database container should be exclusive to the instance, and not shared by any other ServiceControl instances." Type="Variable" Display="always" Required="true" Mask="false">http://servicecontrol-ravendb:8080</Config>
+  <Config Name="REMOTEINSTANCES" Target="REMOTEINSTANCES" Default="[{&quot;api_uri&quot;:&quot;http://servicecontrol-audit:44444/api&quot;}]" Mode="" Description="A JSON structure that provides URLs for the Error instance to access any remote audit instances (https://docs.particular.net/servicecontrol/servicecontrol-instances/remotes). When requesting audit data via the ServiceControl API, the Error instance will communicate to each of the remote audit instances in a scatter-gather pattern and then return the combined results. The URLs must be accessible by the Error instance directly, not constructed to be accessible from an external browser." Type="Variable" Display="always" Required="true" Mask="false"/>
+  <Config Name="TRANSPORTTYPE" Target="TRANSPORTTYPE" Default="" Mode="" Description="Determines the message transport used to communicate with message endpoints. See " Type="Variable" Display="always" Required="true" Mask="false"/>
+  <Config Name="CONNECTIONSTRING" Target="CONNECTIONSTRING" Default="" Mode="" Description="Provides the connection information to connect to the chosen transport. The form of this connection string is different for every message transport. See " Type="Variable" Display="always" Required="true" Mask="false"/>
+  <Config Name="PARTICULARSOFTWARE_LICENSE" Target="PARTICULARSOFTWARE_LICENSE" Default="" Mode="" Description="The Particular Software license, which is most easily provided to a container as an environment variable (https://docs.particular.net/nservicebus/licensing/#license-management-environment-variable). The environment variable should contain the full multi-line contents of the license file. A license file can also be volume-mounted to the container. e.g. (/usr/share/ParticularSoftware/license.xml). If no license file is provided, a trial license will be automatically enabled." Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="ParticularPlatformFiles" Target="/usr/share/ParticularSoftware/" Default="/mnt/cache/appdata/ParticularPlatform/" Mode="rw" Description="An optionally shared folder used by all Particular Service Platform containers. The license file can be saved here and shared among all containers." Type="Path" Display="always" Required="false" Mask="false"/>
+  <Config Name="Canonical Port" Target="33333" Default="33333" Mode="tcp" Description="33333 is the canonical port exposed by the error instance API within the container, though this port can be mapped to any desired external port." Type="Port" Display="always" Required="true" Mask="false">33333</Config>
+  <TailscaleStateDir/>
+</Container>
