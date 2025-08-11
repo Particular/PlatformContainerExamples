@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>servicecontrol-ravendb</Name>
+  <Name>ServiceControl-RavenDB</Name>
   <Repository>particular/servicecontrol-ravendb:latest</Repository>
   <Registry>https://hub.docker.com/r/particular/servicecontrol-ravendb</Registry>
   <Network>bridge</Network>

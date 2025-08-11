@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>servicecontrol-audit</Name>
+  <Name>ServiceControl-Audit</Name>
   <Repository>particular/servicecontrol-audit:latest</Repository>
   <Registry>https://hub.docker.com/r/particular/servicecontrol-audit</Registry>
   <Network>bridge</Network>

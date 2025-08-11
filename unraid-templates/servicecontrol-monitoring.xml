@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>servicecontrol-monitoring</Name>
+  <Name>ServiceControl-Monitoring</Name>
   <Repository>particular/servicecontrol-monitoring:latest</Repository>
   <Registry>https://hub.docker.com/r/particular/servicecontrol-monitoring</Registry>
   <Network>bridge</Network>

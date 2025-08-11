@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>servicecontrol</Name>
+  <Name>ServiceControl</Name>
   <Repository>particular/servicecontrol:latest</Repository>
   <Registry>https://hub.docker.com/r/particular/servicecontrol</Registry>
   <Network>bridge</Network>

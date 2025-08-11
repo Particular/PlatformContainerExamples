@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>servicepulse</Name>
+  <Name>ServicePulse</Name>
   <Repository>particular/servicepulse:latest</Repository>
   <Registry>https://hub.docker.com/r/particular/servicepulse</Registry>
   <Network>bridge</Network>
