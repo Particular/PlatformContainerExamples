@@ -7,4 +7,4 @@ This repository contains examples of deploying the [Particular Service Platform]
 - [Deploying to Azure Container Apps using Bicep](/azure-container-apps/)
 - [Running locally with Docker Compose](/docker-compose/)
 - [Deploying to a Kubernetes cluster using helm](/helm/)
-- [Deploying to Unraid OS](/unraid-templates/)
+- [Deploying to Unraid OS](/unraid-templates/). These templates are also available directly within Unraid via its Community Apps section.
