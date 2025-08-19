@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>ServicePulse</Name>
+  <Repository>particular/servicepulse:latest</Repository>
+  <Registry>https://hub.docker.com/r/particular/servicepulse</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://discuss.particular.net/tag/servicepulse</Support>
+  <Project>https://github.com/Particular/ServicePulse</Project>
+  <Overview>Particular Software ServicePulse&#xD;
+&#xD;
+The 'particular/servicepulse' image is part of the Particular Service Platform, which includes the following images:&#xD;
+ - particular/servicecontrol-ravendb | The database used by the error/audit instances (https://docs.particular.net/servicecontrol/ravendb/containers)&#xD;
+ - particular/servicecontrol | The primary/error instance, which includes error handling and recoverability (https://docs.particular.net/servicecontrol/servicecontrol-instances/)&#xD;
+ - particular/servicecontrol-audit | The audit instance, which stores audit data, and can be scaled out to multiple audit instances (https://docs.particular.net/servicecontrol/audit-instances/)&#xD;
+ - particular/servicecontrol-monitoring | The monitoring instance, which tracks runtime information like throughput, queue length, and other metrics (https://docs.particular.net/servicecontrol/monitoring-instances/)&#xD;
+ - particular/servicepulse | The web application that provides a front end for recoverability and monitoring features (https://docs.particular.net/servicepulse/)&#xD;</Overview>
+  <Category>Tools: Status:Stable</Category>
+  <WebUI/>
+  <TemplateURL/>
+  <Icon>https://www.gravatar.com/avatar/4160e88ff57936ccec0dbaabc67b02f7?s=120&amp;amp;r=g&amp;amp;d=404</Icon>
+  <ExtraParams/>
+  <PostArgs>--setup-and-run</PostArgs>
+  <WebUI>http://[IP]:[PORT:9090]</WebUI>
+  <CPUset/>
+  <DateInstalled>1753682299</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>See "https://docs.particular.net/servicepulse/containerization/" and "https://github.com/Particular/PlatformContainerExamples".</Requires>
+  <Config Name="SERVICECONTROL_URL" Target="SERVICECONTROL_URL" Default="http://servicecontrol-error:33333" Mode="" Description="The ServiceControl URL points to the ServiceControl (Error) instance URL. ServicePulse requests to /api/* will be proxied to this URL in order to fetch ServiceControl data used by ServicePulse." Type="Variable" Display="always" Required="true" Mask="false">http://servicecontrol-error:33333</Config>
+  <Config Name="MONITORING_URL" Target="MONITORING_URL" Default="http://servicecontrol-monitoring:33633" Mode="" Description="The Monitoring URL points to the ServiceControl Monitoring instance URL. ServicePulse requests to /monitoring-api/* will be proxied to this URL in order to fetch monitoring data used by ServicePulse." Type="Variable" Display="always" Required="true" Mask="false">http://servicecontrol-monitoring:33633</Config>
+  <Config Name="Web UI Port" Target="9090" Default="9090" Mode="tcp" Description="9090 is the canonical port exposed by ServicePulse within the container, though this port can be mapped to any desired external port." Type="Port" Display="always" Required="true" Mask="false">9090</Config>
+  <TailscaleStateDir/>
+</Container>
