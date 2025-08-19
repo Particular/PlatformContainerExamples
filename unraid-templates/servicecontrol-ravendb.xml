@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>ServiceControl-RavenDB</Name>
+  <Name>ServiceControl-DB</Name>
   <Repository>particular/servicecontrol-ravendb:latest</Repository>
   <Registry>https://hub.docker.com/r/particular/servicecontrol-ravendb</Registry>
   <Network>bridge</Network>
@@ -9,7 +9,7 @@
   <Privileged>false</Privileged>
   <Support>https://discuss.particular.net/tag/ravendb</Support>
   <Project>https://github.com/Particular/NServiceBus.RavenDB</Project>
-  <Overview>Particular Software ServiceControl RavenDB&#xD;
+  <Overview>Particular Software ServiceControl DB&#xD;
 &#xD;
 The 'particular/servicecontrol-ravendb' image is part of the Particular Service Platform, which includes the following images:&#xD;
  - particular/servicecontrol-ravendb | The database used by the error/audit instances (https://docs.particular.net/servicecontrol/ravendb/containers)&#xD;
