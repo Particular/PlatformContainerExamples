@@ -159,7 +159,7 @@ resource database 'Microsoft.App/containerApps@2024-03-01' = {
           }
           volumeMounts: [
             {
-              mountPath: '/opt/RavenDB/Server/RavenData'
+              mountPath: '/var/lib/ravendb/data'
               volumeName: 'platform-data'
             }
           ]
