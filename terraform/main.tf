@@ -97,6 +97,13 @@ resource "docker_container" "servicecontrol_db" {
   }
 
   restart = "unless-stopped"
+
+  healthcheck {
+    test     = ["CMD-SHELL", "/usr/lib/ravendb/scripts/healthcheck.sh"]
+    interval = "30s"
+    timeout  = "10s"
+    retries  = 3
+  }
 }
 
 # ServiceControl (Error instance) container

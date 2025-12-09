@@ -144,8 +144,7 @@ terraform show
 If a container is misbehaving, you can force Terraform to recreate it:
 
 ```shell
-terraform taint docker_container.servicecontrol
-terraform apply
+terraform apply -replace=docker_container.servicecontrol
 ```
 
 Replace `servicecontrol` with any other container name as needed.
