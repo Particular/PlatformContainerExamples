@@ -98,6 +98,7 @@ resource "docker_container" "servicecontrol_db" {
 
   restart = "unless-stopped"
 
+  # RavenDB container includes a built-in healthcheck script
   healthcheck {
     test     = ["CMD-SHELL", "/usr/lib/ravendb/scripts/healthcheck.sh"]
     interval = "30s"
@@ -124,6 +125,8 @@ resource "docker_container" "servicecontrol" {
     external = var.servicecontrol_port
   }
 
+  # Note: Environment variables use internal container ports (33333, 44444, 33633, 8080)
+  # which are fixed by the container images, not the external mapped ports.
   env = [
     "RAVENDB_CONNECTIONSTRING=http://servicecontrol-db:8080",
     "REMOTEINSTANCES=[{\"api_uri\":\"http://servicecontrol-audit:44444/api\"}]",
@@ -229,6 +232,7 @@ resource "docker_container" "servicepulse" {
     external = var.servicepulse_port
   }
 
+  # Note: URLs use internal container ports (33333, 33633), not external mapped ports
   env = [
     "SERVICECONTROL_URL=http://servicecontrol:33333",
     "MONITORING_URL=http://servicecontrol-monitoring:33633"

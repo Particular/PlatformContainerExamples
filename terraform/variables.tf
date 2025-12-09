@@ -29,7 +29,15 @@ variable "connection_string" {
 }
 
 variable "particular_license" {
-  description = "Particular Software license content (optional, will use trial if not provided)"
+  description = <<-EOT
+    Particular Software license content (optional, will use trial if not provided).
+    Should contain the full XML content of the license file.
+    Example format:
+    <?xml version="1.0" encoding="utf-8"?>
+    <license id="..." expiration="..." type="...">
+      ...
+    </license>
+  EOT
   type        = string
   default     = ""
   sensitive   = true
