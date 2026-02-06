@@ -47,11 +47,11 @@ The `compose-secure.yml` file provides a configuration with HTTPS enabled and OA
 3. **Microsoft Entra ID App Registration**: Configure an app registration for authentication
 
 > [!NOTE]
-> The PFX file contains the private key and certificate for the service to **serve** HTTPS. The CA bundle contains only public CA certificates for the service to **verify** other services' certificates. Both are required when containers communicate over HTTPS.
+> The [PFX file](#generate-a-pfx-certificate-for-local-testing-only) contains the private key and certificate for the service to **serve** HTTPS. The [CA bundle](#generate-a-ca-bundle-for-local-testing-only) contains only public CA certificates for the service to **verify** other services' certificates. Both are required when containers communicate over HTTPS.
 
 ### Configuration
 
-Update as needed, and copy the following variables into the `.env` file.
+Update the below variables as needed, and copy into the `.env` file.
 
 ```text
 CERTIFICATE_PASSWORD=""
@@ -66,7 +66,7 @@ SERVICEPULSE_APISCOPES=''
 | Variable                  | Description                                                                              |
 |---------------------------|------------------------------------------------------------------------------------------|
 | `CERTIFICATE_PASSWORD`    | Password for the PFX certificate                                                         |
-| `CERTIFICATE_PATH`        | Path to the PFX certificate file (e.g.: `./certs/certificate.pfx`)                       |
+| `CERTIFICATE_PATH`        | Path to the PFX certificate file (e.g.: `./certs/servicecontrol.pfx`)                       |
 | `CA_BUNDLE_PATH`          | Path to the CA bundle file (default: `./certs/ca-bundle.crt`)                            |
 | `IDP_AUTHORITY`           | Microsoft Entra ID authority URL (e.g., `https://login.microsoftonline.com/{tenant-id}`) |
 | `SERVICECONTROL_AUDIENCE` | API audience URI (e.g., `api://{client-id}`)                                             |
@@ -80,15 +80,19 @@ SERVICEPULSE_APISCOPES=''
 
 The below assume the `mkcert` tool has been installed.
 
-```cmd
+> [!IMPORTANT]
+> The certificate must include every hostname that will be used to access a service over HTTPS. In a Docker Compose network, containers reach each other using service names as hostnames (e.g., `https://servicecontrol:33333`). During the TLS handshake the client checks that the server's certificate contains a [Subject Alternative Name](https://en.wikipedia.org/wiki/Subject_Alternative_Name) (SAN) matching the hostname it connected to. If the name is missing, the connection is rejected.
+
+```bash
 # Install mkcert's root CA (one-time setup)
 mkcert -install
 
-# Navigate to a certs folder. e.g.
+# Navigate/create a folder to store the certificates. e.g.
+mkdir certs
 cd certs
 
-# Generate PFX certificate for localhost
-mkcert -p12-file localhost.pfx -pkcs12 localhost 127.0.0.1 ::1 servicecontrol servicecontrol-audit servicecontrol-monitor
+# Generate PFX certificate for localhost/servicecontrol instances
+mkcert -p12-file servicecontrol.pfx -pkcs12 localhost 127.0.0.1 ::1 servicecontrol servicecontrol-audit servicecontrol-monitoring
 ```
 
 #### Generate a CA Bundle for Local Testing Only
@@ -100,25 +104,19 @@ When running ServiceControl in Docker containers, each container needs a CA bund
 
 #### What is a CA Bundle?
 
-A CA bundle is a file containing one or more Certificate Authority (CA) certificates. When a container makes an HTTPS request to another service, it uses this bundle to verify the server's certificate chain. Without it, containers would reject connections to services using your mkcert certificates.
-
-#### Why is it needed?
-
-Unlike your host machine (where `mkcert -install` adds the CA to the system trust store), Docker containers don't share the host's trust store. You must explicitly provide the CA certificates that containers should trust.
+A CA bundle is a file containing one or more Certificate Authority (CA) certificates. When a container makes an HTTPS request to another service, it uses this bundle to verify the server's certificate chain. Without it, containers would reject connections to services using your mkcert certificates. Unlike your host machine (where `mkcert -install` adds the CA to the system trust store), Docker containers don't share the host's trust store. You must explicitly provide the CA certificates that containers should trust.
 
 #### Generate the CA bundle
 
-```cmd
-REM Get the mkcert CA root location
+```bash
+# Get the mkcert CA root location
 for /f "delims=" %i in ('mkcert -CAROOT') do set CA_ROOT=%i
 
-REM For local development only (just mkcert CA)
-copy "%CA_ROOT%\rootCA.pem" certs\ca-bundle.crt
+# Navigate to the folder containing the PFX certificate
+cd certs
 
-REM For local development with external HTTPS calls (e.g., Azure AD authentication)
-REM Download Mozilla's public CA bundle and combine with mkcert CA
-copy "%CA_ROOT%\rootCA.pem" certs\ca-bundle.crt
-curl -s https://curl.se/ca/cacert.pem >> certs\ca-bundle.crt
+# For local development only (just mkcert CA)
+copy "%CA_ROOT%\rootCA.pem" ca-bundle.crt
 ```
 
 ### Starting the secure containers
