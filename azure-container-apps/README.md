@@ -70,7 +70,7 @@ To authenticate users to a publicly-accessible ServicePulse instance, Entra ID c
     * The step to create a client secret is not optional.
     * Stop at the **Enable Microsoft Entra ID in your container app** heading.
 3. Fill in parameters for the Bicep script from the previous process:
-    * To find the value for the `azurePrincipalClientId` parameter, go to the App Registration's Overview tab and copy the value of the  **Applciation (client) ID**, which should be a `Guid`.
+    * To find the value for the `azurePrincipalClientId` parameter, go to the App Registration's Overview tab and copy the value of the  **Application (client) ID**, which should be a `Guid`.
    * The value for the `azurePrincipalSecretKey` parameter is the client secret generated during the setup process, and can't be shown again after it is first created. To generate a new secret, go to the App Registration's **Certificates & secrets** tab, click on **Client secrets**, then click **New client secret**. Remember that client secrets eventually expire and must be rotated.
 4. Give the App Registration permissions to collect throughput data on the Azure Service Bus namespace for licensing purposes:
     1. Navigate to the Azure Service Bus namespace in the Azure Portal.
