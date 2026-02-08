@@ -8,7 +8,7 @@ Running ServiceControl and ServicePulse locally in containers provides a way to 
 
  **Pull the latest images:** Before running the containers, ensure you're using the latest version of each image by executing the following command:
 
- ```shell
+ ```pwsh
  docker compose pull
  ```
 
@@ -16,7 +16,7 @@ This command checks for any updates to the images specified in the docker-compos
 
 **Start the containers:** After pulling the latest images, modify the [environment file](.env), if necessary, and then start up the containers using:
 
-```shell
+```pwsh
 docker compose up -d
 ```
 
@@ -51,27 +51,27 @@ The `compose-secure.yml` file provides a configuration with HTTPS enabled and OA
 
 ### Configuration
 
-Update the below variables as needed, and copy into the `.env` file.
+Add the following variables to your `.env` file and replace the `{placeholder}` values with your actual configuration:
 
 ```text
-CERTIFICATE_PASSWORD=""
-CERTIFICATE_PATH=""
-CA_BUNDLE_PATH=""
-IDP_AUTHORITY=""
-SERVICECONTROL_AUDIENCE=""
-SERVICEPULSE_CLIENTID=""
-SERVICEPULSE_APISCOPES=''
+CERTIFICATE_PASSWORD="{password}"
+CERTIFICATE_PATH="./certs/servicecontrol.pfx"
+CA_BUNDLE_PATH="./certs/ca-bundle.crt"
+IDP_AUTHORITY="https://login.microsoftonline.com/{tenant-id}"
+SERVICECONTROL_AUDIENCE="api://{servicecontrol-client-id}"
+SERVICEPULSE_CLIENTID="{servicepulse-client-id}"
+SERVICEPULSE_APISCOPES=["api://{servicecontrol-client-id}/{scope-name}"]
 ```
 
 | Variable                  | Description                                                                              |
 |---------------------------|------------------------------------------------------------------------------------------|
-| `CERTIFICATE_PASSWORD`    | Password for the PFX certificate                                                         |
-| `CERTIFICATE_PATH`        | Path to the PFX certificate file (e.g.: `./certs/servicecontrol.pfx`)                       |
-| `CA_BUNDLE_PATH`          | Path to the CA bundle file (default: `./certs/ca-bundle.crt`)                            |
+| `CERTIFICATE_PASSWORD`    | Password for the PFX certificate (e.g., the password used when generating with mkcert)                                                         |
+| `CERTIFICATE_PATH`        | Path to the PFX certificate file (e.g., `./certs/servicecontrol.pfx`)                       |
+| `CA_BUNDLE_PATH`          | Path to the CA bundle file (e.g., `./certs/ca-bundle.crt`)                            |
 | `IDP_AUTHORITY`           | Microsoft Entra ID authority URL (e.g., `https://login.microsoftonline.com/{tenant-id}`) |
-| `SERVICECONTROL_AUDIENCE` | API audience URI (e.g., `api://{client-id}`)                                             |
-| `SERVICEPULSE_CLIENTID`   | ServicePulse app registration client ID                                                  |
-| `SERVICEPULSE_APISCOPES`  | Array of API scopes. e.g. `["api://{client-id}"]`                                        |
+| `SERVICECONTROL_AUDIENCE` | Application ID URI from ServiceControl app registration (e.g., `api://{servicecontrol-client-id}`)                                             |
+| `SERVICEPULSE_CLIENTID`   | Application (client) ID from ServicePulse app registration AD                                                  |
+| `SERVICEPULSE_APISCOPES`  | Array of API scopes ServicePulse should request when calling ServiceControl (e.g., ["api://{servicecontrol-client-id}/{scope-name}"])                                        |
 
 #### Generate a PFX Certificate for Local Testing Only
 
@@ -83,7 +83,7 @@ The below assume the `mkcert` tool has been installed.
 > [!IMPORTANT]
 > The certificate must include every hostname that will be used to access a service over HTTPS. In a Docker Compose network, containers reach each other using service names as hostnames (e.g., `https://servicecontrol:33333`). During the TLS handshake the client checks that the server's certificate contains a [Subject Alternative Name](https://en.wikipedia.org/wiki/Subject_Alternative_Name) (SAN) matching the hostname it connected to. If the name is missing, the connection is rejected.
 
-```bash
+```pwsh
 # Install mkcert's root CA (one-time setup)
 mkcert -install
 
@@ -108,23 +108,23 @@ A CA bundle is a file containing one or more Certificate Authority (CA) certific
 
 #### Generate the CA bundle
 
-```bash
+```pwsh
 # Get the mkcert CA root location
-for /f "delims=" %i in ('mkcert -CAROOT') do set CA_ROOT=%i
+$CA_ROOT = mkcert -CAROOT
 
 # Navigate to the folder containing the PFX certificate
 cd certs
 
 # For local development only (just mkcert CA)
-copy "%CA_ROOT%\rootCA.pem" ca-bundle.crt
+copy "$CA_ROOT/rootCA.pem" ca-bundle.crt
 ```
 
 ### Starting the secure containers
 
-```shell
+```pwsh
 docker compose -f compose-secure.yml up -d
 ```
 
 Once composed:
 
-- [ServicePulse](https://docs.particular.net/servicepulse/) can be accessed at `https://localhost:9090`
+- [ServicePulse](https://docs.particular.net/servicepulse/) can be accessed at https://localhost:9090

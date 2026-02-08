@@ -38,7 +38,7 @@ services:
 
   # WARNING: A single database container should not be shared between multiple ServiceControl instances in production scenarios.
   servicecontrol-db:
-    image: particular/servicecontrol-ravendb:${SERVICECONTROL_TAG}
+    image: particular/servicecontrol-ravendb:latest
     ports:
       - "8080:8080"
     volumes:
