@@ -119,6 +119,13 @@ cd certs
 copy "$CA_ROOT/rootCA.pem" ca-bundle.crt
 ```
 
+ ### Pull the latest images
+ Before running the containers, ensure you're using the latest version of each image by executing the following command:
+
+ ```pwsh
+ docker compose -f compose-secure.yml pull
+ ```
+
 ### Starting the secure containers
 
 ```pwsh
