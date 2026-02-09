@@ -1,0 +1,151 @@
+name: service-platform
+
+services:
+  servicecontrol:
+    image: particular/servicecontrol:${SERVICECONTROL_TAG}
+    env_file: .env
+    ports:
+      - "33333:33333"
+    environment:
+      RAVENDB_CONNECTIONSTRING: http://servicecontrol-db:8080
+      REMOTEINSTANCES: '[{"api_uri":"https://servicecontrol-audit:44444/api"}]'
+      SERVICECONTROL_HTTPS_ENABLED: "true"
+      SERVICECONTROL_HTTPS_CERTIFICATEPATH: "/usr/share/ParticularSoftware/certificate.pfx"
+      SERVICECONTROL_HTTPS_CERTIFICATEPASSWORD: "${CERTIFICATE_PASSWORD}"
+      SSL_CERT_FILE: "/etc/ssl/certs/ca-bundle.crt"
+      SERVICECONTROL_AUTHENTICATION_ENABLED: "true"
+      SERVICECONTROL_AUTHENTICATION_AUTHORITY: "${IDP_AUTHORITY}"
+      SERVICECONTROL_AUTHENTICATION_AUDIENCE: "${SERVICECONTROL_AUDIENCE}"
+      SERVICECONTROL_AUTHENTICATION_SERVICEPULSE_CLIENTID: "${SERVICEPULSE_CLIENTID}"
+      SERVICECONTROL_AUTHENTICATION_SERVICEPULSE_AUTHORITY: "${IDP_AUTHORITY}/v2.0"
+      SERVICECONTROL_AUTHENTICATION_SERVICEPULSE_APISCOPES: '${SERVICEPULSE_APISCOPES}'
+    command: --setup-and-run
+    restart: unless-stopped
+    volumes:
+      - ${CERTIFICATE_PATH}:/usr/share/ParticularSoftware/certificate.pfx
+      - ${CA_BUNDLE_PATH}:/etc/ssl/certs/ca-bundle.crt:ro
+    healthcheck:
+      test: ["CMD", "/healthcheck/healthcheck", "https://localhost:33333/api"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    depends_on:
+      servicecontrol-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # WARNING: A single database container should not be shared between multiple ServiceControl instances in production scenarios.
+  servicecontrol-db:
+    image: particular/servicecontrol-ravendb:${SERVICECONTROL_TAG}
+    ports:
+      - "8080:8080"
+    volumes:
+      - raven-config:/var/lib/ravendb/config
+      - raven-data:/var/lib/ravendb/data
+
+  servicecontrol-audit:
+    image: particular/servicecontrol-audit:${SERVICECONTROL_TAG}
+    env_file: .env
+    ports:
+      - "44444:44444"
+    environment:
+      RAVENDB_CONNECTIONSTRING: http://servicecontrol-db:8080
+      SERVICECONTROLQUEUEADDRESS: Particular.ServiceControl
+      SERVICECONTROL_AUDIT_HTTPS_ENABLED: "true"
+      SERVICECONTROL_AUDIT_HTTPS_CERTIFICATEPATH: "/usr/share/ParticularSoftware/certificate.pfx"
+      SERVICECONTROL_AUDIT_HTTPS_CERTIFICATEPASSWORD: "${CERTIFICATE_PASSWORD}"
+      SSL_CERT_FILE: "/etc/ssl/certs/ca-bundle.crt"
+      SERVICECONTROL_AUDIT_AUTHENTICATION_ENABLED: "true"
+      SERVICECONTROL_AUDIT_AUTHENTICATION_AUTHORITY: "${IDP_AUTHORITY}"
+      SERVICECONTROL_AUDIT_AUTHENTICATION_AUDIENCE: "${SERVICECONTROL_AUDIENCE}"
+    command: --setup-and-run
+    restart: unless-stopped
+    volumes:
+      - ${CERTIFICATE_PATH}:/usr/share/ParticularSoftware/certificate.pfx
+      - ${CA_BUNDLE_PATH}:/etc/ssl/certs/ca-bundle.crt:ro
+    healthcheck:
+      test: ["CMD", "/healthcheck/healthcheck", "https://localhost:44444/api"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    depends_on:
+      servicecontrol-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  servicecontrol-monitoring:
+    image: particular/servicecontrol-monitoring:${SERVICECONTROL_TAG}
+    env_file: .env
+    environment:
+      MONITORING_HTTPS_ENABLED: "true"
+      MONITORING_HTTPS_CERTIFICATEPATH: "/usr/share/ParticularSoftware/certificate.pfx"
+      MONITORING_HTTPS_CERTIFICATEPASSWORD: "${CERTIFICATE_PASSWORD}"
+      SSL_CERT_FILE: "/etc/ssl/certs/ca-bundle.crt"
+      MONITORING_AUTHENTICATION_ENABLED: "true"
+      MONITORING_AUTHENTICATION_AUTHORITY: "${IDP_AUTHORITY}"
+      MONITORING_AUTHENTICATION_AUDIENCE: "${SERVICECONTROL_AUDIENCE}"
+    restart: unless-stopped
+    command: --setup-and-run
+    ports:
+      - "33633:33633"
+    volumes:
+      - ${CERTIFICATE_PATH}:/usr/share/ParticularSoftware/certificate.pfx
+      - ${CA_BUNDLE_PATH}:/etc/ssl/certs/ca-bundle.crt:ro
+    healthcheck:
+      test: ["CMD", "/healthcheck/healthcheck", "https://localhost:33633/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  servicepulse:
+    image: particular/servicepulse:${SERVICEPULSE_TAG}
+    ports:
+      - "9090:9090"
+    environment:
+      SERVICECONTROL_URL: https://servicecontrol:33333
+      MONITORING_URL: https://servicecontrol-monitoring:33633
+      SERVICEPULSE_HTTPS_ENABLED: "true"
+      SERVICEPULSE_HTTPS_CERTIFICATEPATH: "/usr/share/ParticularSoftware/certificate.pfx"
+      SERVICEPULSE_HTTPS_CERTIFICATEPASSWORD: "${CERTIFICATE_PASSWORD}"
+      SSL_CERT_FILE: "/etc/ssl/certs/ca-bundle.crt"
+      ASPNETCORE_URLS: "https://+:9090"
+    restart: unless-stopped
+    volumes:
+      - ${CERTIFICATE_PATH}:/usr/share/ParticularSoftware/certificate.pfx
+      - ${CA_BUNDLE_PATH}:/etc/ssl/certs/ca-bundle.crt:ro
+    depends_on:
+      servicecontrol:
+        condition: service_healthy
+      servicecontrol-monitoring:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: unless-stopped
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      start_interval: 10s
+      retries: 3
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq-data:
+  raven-config:
+  raven-data:
