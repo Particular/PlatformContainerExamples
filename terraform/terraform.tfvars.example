@@ -1,0 +1,30 @@
+# Example Terraform variables file
+# Copy this file to terraform.tfvars and customize as needed
+
+# Docker host (defaults to local Docker daemon)
+# docker_host = "unix:///var/run/docker.sock"
+
+# Image tags
+servicecontrol_tag = "latest"
+servicepulse_tag   = "latest"
+
+# Transport configuration
+transport_type    = "RabbitMQ.QuorumConventionalRouting"
+connection_string = "host=rabbitmq;username=guest;password=guest"
+
+# Optional: Particular Software license
+# particular_license = <<-EOT
+# <?xml version="1.0" encoding="utf-8"?>
+# <license id="..." expiration="..." type="...">
+#   ...
+# </license>
+# EOT
+
+# Port mappings (defaults shown)
+# servicecontrol_port           = 33333
+# servicecontrol_audit_port     = 44444
+# servicecontrol_monitoring_port = 33633
+# servicepulse_port             = 9090
+# ravendb_port                  = 8080
+# rabbitmq_port                 = 5672
+# rabbitmq_management_port      = 15672
