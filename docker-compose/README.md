@@ -6,13 +6,11 @@ Running ServiceControl and ServicePulse locally in containers provides a way to 
 
 ## Usage
 
- **Pull the latest images:** Before running the containers, ensure you're using the latest version of each image by executing the following command:
+**Pull the latest images:** Before running the containers, ensure you're using the latest version of each image by executing the following command:
 
- ```pwsh
- docker compose pull
- ```
-
-This command checks for any updates to the images specified in the docker-compose.yml file and pulls them if available.
+```pwsh
+docker compose pull
+```
 
 **Start the containers:** After pulling the latest images, modify the [environment file](.env), if necessary, and then start up the containers using:
 
@@ -42,16 +40,13 @@ The `compose-secure.yml` file provides a configuration with HTTPS enabled and OA
 
 ### Prerequisites
 
-1. **SSL Certificate**: A PFX certificate file for HTTPS
-2. **CA Bundle**: A CA certificate bundle for validating the identity provider's certificates
+1. **SSL Certificate**: A PFX certificate file — see [Generating a certificate](#generating-a-certificate-local-testing-only) below
+2. **CA Bundle**: A PEM file containing the CA that signed your certificate — see [Generating a CA bundle](#generating-a-ca-bundle-local-testing-only) below
 3. **Microsoft Entra ID App Registration**: Configure an app registration for authentication
-
-> [!NOTE]
-> The [PFX file](#generate-a-pfx-certificate-for-local-testing-only) contains the private key and certificate for the service to **serve** HTTPS. The [CA bundle](#generate-a-ca-bundle-for-local-testing-only) contains only public CA certificates for the service to **verify** other services' certificates. Both are required when containers communicate over HTTPS.
 
 ### Configuration
 
-Add the following variables to your `.env` file and replace the `{placeholder}` values with your actual configuration:
+Update your `.env` file with the following values, replacing the `{placeholder}` values with your actual configuration:
 
 ```text
 CERTIFICATE_PASSWORD="{password}"
@@ -63,75 +58,253 @@ SERVICEPULSE_CLIENTID="{servicepulse-client-id}"
 SERVICEPULSE_APISCOPES=["api://{servicecontrol-client-id}/{scope-name}"]
 ```
 
-| Variable                  | Description                                                                              |
-|---------------------------|------------------------------------------------------------------------------------------|
-| `CERTIFICATE_PASSWORD`    | Password for the PFX certificate (e.g., the password used when generating with mkcert)                                                         |
-| `CERTIFICATE_PATH`        | Path to the PFX certificate file (e.g., `./certs/servicecontrol.pfx`)                       |
-| `CA_BUNDLE_PATH`          | Path to the CA bundle file (e.g., `./certs/ca-bundle.crt`)                            |
-| `IDP_AUTHORITY`           | Microsoft Entra ID authority URL (e.g., `https://login.microsoftonline.com/{tenant-id}`) |
-| `SERVICECONTROL_AUDIENCE` | Application ID URI from ServiceControl app registration (e.g., `api://{servicecontrol-client-id}`)                                             |
-| `SERVICEPULSE_CLIENTID`   | Application (client) ID from ServicePulse app registration AD                                                  |
-| `SERVICEPULSE_APISCOPES`  | Array of API scopes ServicePulse should request when calling ServiceControl (e.g., ["api://{servicecontrol-client-id}/{scope-name}"])                                        |
+| Variable                  | Description                                                                                                                              |
+|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `CERTIFICATE_PASSWORD`    | Password for the PFX certificate                                                                                                         |
+| `CERTIFICATE_PATH`        | Path to the PFX certificate file                                                                                                         |
+| `CA_BUNDLE_PATH`          | Path to a PEM file containing the CA that signed the PFX. Containers use this to verify each other's certificates over HTTPS.            |
+| `IDP_AUTHORITY`           | Microsoft Entra ID authority URL (e.g., `https://login.microsoftonline.com/{tenant-id}`)                                                 |
+| `SERVICECONTROL_AUDIENCE` | Application ID URI from ServiceControl app registration (e.g., `api://{servicecontrol-client-id}`)                                       |
+| `SERVICEPULSE_CLIENTID`   | Application (client) ID from ServicePulse app registration                                                                               |
+| `SERVICEPULSE_APISCOPES`  | Array of API scopes ServicePulse should request when calling ServiceControl (e.g., `["api://{servicecontrol-client-id}/{scope-name}"]`)   |
 
-#### Generate a PFX Certificate for Local Testing Only
+#### Identity provider configuration examples
 
-> [!WARNING]
-> The certificate generated below is for local testing only. Use a certificate from a trusted Certificate Authority for production deployments.
+The `.env` values for `IDP_AUTHORITY`, `SERVICECONTROL_AUDIENCE`, `SERVICEPULSE_CLIENTID`, and `SERVICEPULSE_APISCOPES` depend on which identity provider you use.
 
-The below assume the `mkcert` tool has been installed.
+<details>
+<summary>Microsoft Entra ID</summary>
 
-> [!IMPORTANT]
-> The certificate must include every hostname that will be used to access a service over HTTPS. In a Docker Compose network, containers reach each other using service names as hostnames (e.g., `https://servicecontrol:33333`). During the TLS handshake the client checks that the server's certificate contains a [Subject Alternative Name](https://en.wikipedia.org/wiki/Subject_Alternative_Name) (SAN) matching the hostname it connected to. If the name is missing, the connection is rejected.
+Register two app registrations in [Entra ID](https://entra.microsoft.com):
 
-```pwsh
-# Install mkcert's root CA (one-time setup)
-mkcert -install
+- **ServiceControl**: expose an API with an application ID URI and at least one scope
+- **ServicePulse**: register as a single-page application; grant it permission to call the ServiceControl API
 
-# Navigate/create a folder to store the certificates. e.g.
-mkdir certs
-cd certs
-
-# Generate PFX certificate for localhost/servicecontrol instances
-mkcert -p12-file servicecontrol.pfx -pkcs12 localhost 127.0.0.1 ::1 servicecontrol servicecontrol-audit servicecontrol-monitoring
+```text
+IDP_AUTHORITY="https://login.microsoftonline.com/{tenant-id}"
+SERVICECONTROL_AUDIENCE="api://{servicecontrol-client-id}"
+SERVICEPULSE_CLIENTID="{servicepulse-client-id}"
+SERVICEPULSE_APISCOPES=["api://{servicecontrol-client-id}/{scope-name}"]
 ```
 
-#### Generate a CA Bundle for Local Testing Only
+</details>
+
+<details>
+<summary>Auth0</summary>
+
+In your [Auth0 dashboard](https://manage.auth0.com):
+
+- **API**: create an API whose *identifier* becomes `SERVICECONTROL_AUDIENCE`. Add a permission (scope) for ServicePulse to request.
+- **Application**: create a Single Page Application for ServicePulse. Add `https://localhost:9090` to *Allowed Callback URLs*, *Allowed Logout URLs*, and *Allowed Web Origins*.
+
+```text
+IDP_AUTHORITY="https://{tenant}.auth0.com/"
+SERVICECONTROL_AUDIENCE="{api-identifier}"
+SERVICEPULSE_CLIENTID="{servicepulse-application-client-id}"
+SERVICEPULSE_APISCOPES=["{api-identifier}/{permission-name}"]
+```
+
+> [!NOTE]
+> The Auth0 authority URL requires a trailing slash.
+
+</details>
+
+<details>
+<summary>Keycloak</summary>
+
+In your Keycloak admin console:
+
+- **ServiceControl client**: create a client with *Client authentication* enabled. Under *Client scopes*, add a dedicated scope (e.g., `servicecontrol:read`). Add an *Audience* mapper so the access token includes the ServiceControl client ID in the `aud` claim.
+- **ServicePulse client**: create a public client with *Standard flow* and PKCE enabled. Add the ServiceControl scope as an optional or default scope.
+
+```text
+IDP_AUTHORITY="https://{keycloak-host}/realms/{realm}"
+SERVICECONTROL_AUDIENCE="{servicecontrol-client-id}"
+SERVICEPULSE_CLIENTID="{servicepulse-client-id}"
+SERVICEPULSE_APISCOPES=["{servicecontrol-client-id}/{scope-name}"]
+```
+
+</details>
+
+<details>
+<summary>Duende IdentityServer</summary>
+
+In your IdentityServer configuration:
+
+- **ApiResource**: register a resource for ServiceControl with one or more scopes (e.g., `servicecontrol:read`).
+- **Client**: register a client for ServicePulse using the `authorization_code` grant with PKCE. Grant it access to the ServiceControl scopes and set `RedirectUris` to `https://localhost:9090`.
+
+```text
+IDP_AUTHORITY="https://{your-identity-server}"
+SERVICECONTROL_AUDIENCE="{api-resource-name}"
+SERVICEPULSE_CLIENTID="{servicepulse-client-id}"
+SERVICEPULSE_APISCOPES=["{api-resource-name}/{scope-name}"]
+```
+
+</details>
+
+### Generating a certificate (local testing only)
+
+> [!WARNING]
+> The certificates generated below are for local testing only. Use a certificate from a trusted Certificate Authority for production deployments.
+
+> [!IMPORTANT]
+> The certificate must include every hostname used to access services over HTTPS. In a Docker Compose network, containers reach each other using their service names as hostnames (e.g., `https://servicecontrol:33333`). The TLS handshake checks that the server certificate contains a [Subject Alternative Name](https://en.wikipedia.org/wiki/Subject_Alternative_Name) (SAN) matching the hostname being connected to — if a name is missing, the connection is rejected.
+
+#### Option 1: Using mkcert
+
+Install [mkcert](https://github.com/FiloSottile/mkcert):
+
+```pwsh
+winget install FiloSottile.mkcert
+```
+
+Generate the certificate:
+
+```pwsh
+# One-time setup: add mkcert's root CA to your system trust store
+mkcert -install
+
+# Create the certs folder and generate a PFX covering all required hostnames
+mkdir certs
+mkcert -p12-file certs/servicecontrol.pfx -pkcs12 localhost 127.0.0.1 ::1 servicecontrol servicecontrol-audit servicecontrol-monitoring
+```
+
+> [!NOTE]
+> mkcert sets the PKCS12 password to `changeit`. Set `CERTIFICATE_PASSWORD=changeit` in `.env`.
+
+#### Option 2: Using PowerShell (no additional tools required)
+
+Run the following from the `docker-compose` directory. Set `CERTIFICATE_PASSWORD=password` in `.env` (or change the password in the script and update `.env` to match).
+
+```pwsh
+# Create a local CA
+$ca = New-SelfSignedCertificate `
+    -Subject "CN=LocalDevCA" `
+    -KeyUsageProperty Sign `
+    -KeyUsage CertSign, CRLSign, DigitalSignature `
+    -TextExtension @("2.5.29.19={critical}{text}ca=TRUE") `
+    -KeyExportPolicy Exportable `
+    -CertStoreLocation "Cert:\CurrentUser\My" `
+    -NotAfter (Get-Date).AddYears(5)
+
+# Create server cert signed by the CA, covering all required hostnames
+$cert = New-SelfSignedCertificate `
+    -Subject "CN=localhost" `
+    -DnsName "localhost","servicecontrol","servicecontrol-audit","servicecontrol-monitoring" `
+    -Signer $ca `
+    -KeyExportPolicy Exportable `
+    -CertStoreLocation "Cert:\CurrentUser\My" `
+    -NotAfter (Get-Date).AddYears(2)
+
+New-Item -ItemType Directory -Force certs | Out-Null
+
+# Export the server cert as PFX
+$password = ConvertTo-SecureString -String "password" -Force -AsPlainText
+Export-PfxCertificate -Cert $cert -FilePath "certs\servicecontrol.pfx" -Password $password
+
+# Export the CA cert as PEM — this becomes the CA bundle
+$caBytes = $ca.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
+$caPem = "-----BEGIN CERTIFICATE-----`n" + [Convert]::ToBase64String($caBytes, "InsertLineBreaks") + "`n-----END CERTIFICATE-----"
+Set-Content -Path "certs\ca-bundle.crt" -Value $caPem -Encoding ASCII
+
+# Remove temporary certs from the store
+Remove-Item "Cert:\CurrentUser\My\$($ca.Thumbprint)" -Force
+Remove-Item "Cert:\CurrentUser\My\$($cert.Thumbprint)" -Force
+```
+
+#### Option 3: Using OpenSSL
+
+> [!NOTE]
+> On Windows, run these commands in Git Bash or WSL. OpenSSL 1.1.1 or later is required.
+
+```bash
+mkdir -p certs
+
+# Generate a CA key and self-signed CA certificate
+openssl genrsa -out certs/ca.key 4096
+openssl req -x509 -new -nodes -key certs/ca.key -sha256 -days 1825 \
+  -out certs/ca.crt -subj "/CN=LocalDevCA"
+
+# Generate a server key and certificate signing request
+openssl genrsa -out certs/servicecontrol.key 2048
+openssl req -new -key certs/servicecontrol.key -out certs/servicecontrol.csr \
+  -subj "/CN=localhost"
+
+# Sign the server cert with the CA, including all required SANs
+openssl x509 -req -in certs/servicecontrol.csr \
+  -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial \
+  -out certs/servicecontrol.crt -days 730 -sha256 \
+  -addext "subjectAltName=DNS:localhost,DNS:servicecontrol,DNS:servicecontrol-audit,DNS:servicecontrol-monitoring,IP:127.0.0.1,IP:::1"
+
+# Bundle into a PFX (password: "password")
+openssl pkcs12 -export -out certs/servicecontrol.pfx \
+  -inkey certs/servicecontrol.key -in certs/servicecontrol.crt \
+  -certfile certs/ca.crt -passout pass:password
+
+# Use the CA cert as the CA bundle
+cp certs/ca.crt certs/ca-bundle.crt
+
+# Remove intermediate files
+rm certs/ca.key certs/servicecontrol.key certs/servicecontrol.csr certs/ca.srl
+```
+
+Set `CERTIFICATE_PASSWORD=password` in `.env`. The CA bundle is generated by this script — no additional step needed.
+
+### Generating a CA bundle (local testing only)
 
 > [!WARNING]
 > The CA bundle generated below is for local testing only. Use certificates from a trusted Certificate Authority for production deployments.
 
-When running ServiceControl in Docker containers, each container needs a CA bundle file to trust certificates presented by other services. The `SSL_CERT_FILE` environment variable tells .NET where to find this bundle.
+Docker containers don't share the host's certificate trust store. The CA bundle provides containers with the CA certificates they need to verify HTTPS connections to other services — including the internal healthcheck that determines whether a container is ready. Without it, containers will reject HTTPS connections and fail their healthchecks.
 
-#### What is a CA Bundle?
+#### Using mkcert
 
-A CA bundle is a file containing one or more Certificate Authority (CA) certificates. When a container makes an HTTPS request to another service, it uses this bundle to verify the server's certificate chain. Without it, containers would reject connections to services using your mkcert certificates. Unlike your host machine (where `mkcert -install` adds the CA to the system trust store), Docker containers don't share the host's trust store. You must explicitly provide the CA certificates that containers should trust.
-
-#### Generate the CA bundle
+If you used mkcert to generate the certificate, copy its root CA as the bundle:
 
 ```pwsh
-# Get the mkcert CA root location
-$CA_ROOT = mkcert -CAROOT
-
-# Navigate to the folder containing the PFX certificate
-cd certs
-
-# For local development only (just mkcert CA)
-copy "$CA_ROOT/rootCA.pem" ca-bundle.crt
+copy "$(mkcert -CAROOT)\rootCA.pem" certs\ca-bundle.crt
 ```
 
- ### Pull the latest images
- Before running the containers, ensure you're using the latest version of each image by executing the following command:
+#### Using PowerShell
 
- ```pwsh
- docker compose -f compose-secure.yml pull
- ```
+The PowerShell script above already writes `certs\ca-bundle.crt` as part of cert generation. No additional step is needed.
 
-### Starting the secure containers
+#### Using OpenSSL
+
+The OpenSSL script above already writes `certs/ca-bundle.crt` as part of cert generation. No additional step is needed.
+
+### Pull the latest images
+
+Before running the containers, ensure you're using the latest version of each image:
+
+```pwsh
+docker compose -f compose-secure.yml pull
+```
+
+### Start the containers
 
 ```pwsh
 docker compose -f compose-secure.yml up -d
 ```
 
-Once composed:
+Once running, [ServicePulse](https://docs.particular.net/servicepulse/) can be accessed at https://localhost:9090.
 
-- [ServicePulse](https://docs.particular.net/servicepulse/) can be accessed at https://localhost:9090
+### Troubleshooting
+
+#### Container is unhealthy but logs show no errors
+
+Docker's healthcheck output is separate from container logs. To see the actual failure reason:
+
+```pwsh
+docker inspect --format='{{json .State.Health}}' service-platform-servicecontrol-1
+```
+
+Common causes and fixes:
+
+| Error | Cause | Fix |
+|---|---|---|
+| `UntrustedRoot` | CA bundle is empty or doesn't contain the CA that signed the PFX | Verify `certs\ca-bundle.crt` is non-empty and was generated from the same CA used to sign the PFX |
+| `The SSL connection could not be established` | Certificate is missing a required SAN (e.g., `localhost`) or the PFX file is invalid | Regenerate the certificate ensuring all hostnames are included |
+| File not found / empty cert | `CERTIFICATE_PATH` in `.env` points to a file that doesn't exist | Check the path is correct and the file exists on the host before starting containers |
+| `AuthenticationException` | `CERTIFICATE_PASSWORD` in `.env` doesn't match the password used to generate the PFX | Update `CERTIFICATE_PASSWORD` to match (mkcert uses `changeit` by default) |
