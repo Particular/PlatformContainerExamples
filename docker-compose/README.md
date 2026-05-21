@@ -48,7 +48,6 @@ The `compose-secure.yml` file provides a configuration with HTTPS enabled and OA
 
 Update your `.env` file with the following values, replacing the `{placeholder}` values with your actual configuration:
 
-```text
 CERTIFICATE_PASSWORD="{password}"
 CERTIFICATE_PATH="./certs/servicecontrol.pfx"
 CA_BUNDLE_PATH="./certs/ca-bundle.crt"
@@ -80,7 +79,6 @@ Register two app registrations in [Entra ID](https://entra.microsoft.com):
 - **ServiceControl**: expose an API with an application ID URI and at least one scope
 - **ServicePulse**: register as a single-page application; grant it permission to call the ServiceControl API
 
-```text
 IDP_AUTHORITY="https://login.microsoftonline.com/{tenant-id}"
 SERVICECONTROL_AUDIENCE="api://{servicecontrol-client-id}"
 SERVICEPULSE_CLIENTID="{servicepulse-client-id}"
@@ -97,7 +95,6 @@ In your [Auth0 dashboard](https://manage.auth0.com):
 - **API**: create an API whose *identifier* becomes `SERVICECONTROL_AUDIENCE`. Add a permission (scope) for ServicePulse to request.
 - **Application**: create a Single Page Application for ServicePulse. Add `https://localhost:9090` to *Allowed Callback URLs*, *Allowed Logout URLs*, and *Allowed Web Origins*.
 
-```text
 IDP_AUTHORITY="https://{tenant}.auth0.com/"
 SERVICECONTROL_AUDIENCE="{api-identifier}"
 SERVICEPULSE_CLIENTID="{servicepulse-application-client-id}"
@@ -117,7 +114,6 @@ In your Keycloak admin console:
 - **ServiceControl client**: create a client with *Client authentication* enabled. Under *Client scopes*, add a dedicated scope (e.g., `servicecontrol:read`). Add an *Audience* mapper so the access token includes the ServiceControl client ID in the `aud` claim.
 - **ServicePulse client**: create a public client with *Standard flow* and PKCE enabled. Add the ServiceControl scope as an optional or default scope.
 
-```text
 IDP_AUTHORITY="https://{keycloak-host}/realms/{realm}"
 SERVICECONTROL_AUDIENCE="{servicecontrol-client-id}"
 SERVICEPULSE_CLIENTID="{servicepulse-client-id}"
@@ -134,7 +130,6 @@ In your IdentityServer configuration:
 - **ApiResource**: register a resource for ServiceControl with one or more scopes (e.g., `servicecontrol:read`).
 - **Client**: register a client for ServicePulse using the `authorization_code` grant with PKCE. Grant it access to the ServiceControl scopes and set `RedirectUris` to `https://localhost:9090`.
 
-```text
 IDP_AUTHORITY="https://{your-identity-server}"
 SERVICECONTROL_AUDIENCE="{api-resource-name}"
 SERVICEPULSE_CLIENTID="{servicepulse-client-id}"
