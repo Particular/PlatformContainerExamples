@@ -109,16 +109,36 @@ SERVICEPULSE_APISCOPES=["{api-identifier}/{permission-name}"]
 <details>
 <summary>Keycloak</summary>
 
-In your Keycloak admin console:
+A `compose-secure-keycloak.yml` file is provided to run Keycloak alongside the Service Platform stack. It is configured via `.env.keycloak`.
 
-- **ServiceControl client**: create a client with *Client authentication* enabled. Under *Client scopes*, add a dedicated scope (e.g., `servicecontrol:read`). Add an *Audience* mapper so the access token includes the ServiceControl client ID in the `aud` claim.
-- **ServicePulse client**: create a public client with *Standard flow* and PKCE enabled. Add the ServiceControl scope as an optional or default scope.
+#### Configuring Keycloak
 
-IDP_AUTHORITY="https://{keycloak-host}/realms/{realm}"
+Pull and start the stack, then log in to the Keycloak admin console at `https://localhost:8282` with username `admin` and password `admin`:
+
+```pwsh
+docker compose -f compose-secure-keycloak.yml --env-file .env.keycloak pull
+docker compose -f compose-secure-keycloak.yml --env-file .env.keycloak up -d
+```
+
+In the Keycloak admin console:
+
+1. **Create a realm** (e.g. `my-realm`)
+2. **Create a client scope** at the realm level (e.g. `servicecontrol`)
+3. **ServiceControl client**: create a client. On its dedicated client scope, add an *Audience* mapper so access tokens include the ServiceControl client ID in the `aud` claim.
+4. **ServicePulse client**: create a public client with *Standard flow* and PKCE enabled. Set the valid redirect URI to `https://localhost:9090/*` and web origin to `https://localhost:9090`. Add the ServiceControl scope as an optional scope.
+
+#### `.env.keycloak` values
+
+Update `.env.keycloak` with the following, replacing the `{placeholder}` values with your Keycloak configuration:
+
+```text
+IDP_AUTHORITY="https://localhost:8282/realms/{realm}"
 SERVICECONTROL_AUDIENCE="{servicecontrol-client-id}"
 SERVICEPULSE_CLIENTID="{servicepulse-client-id}"
-SERVICEPULSE_APISCOPES=["{servicecontrol-client-id}/{scope-name}"]
+SERVICEPULSE_APISCOPES=["{scope-name}"]
 ```
+
+Once running, [ServicePulse](https://docs.particular.net/servicepulse/) can be accessed at https://localhost:9090.
 
 </details>
 
@@ -213,24 +233,31 @@ Remove-Item "Cert:\CurrentUser\My\$($cert.Thumbprint)" -Force
 > [!NOTE]
 > On Windows, run these commands in Git Bash or WSL. OpenSSL 1.1.1 or later is required.
 
+> [!NOTE]
+> On Windows with Git Bash, prefix any `openssl req` command that uses `-subj` with `MSYS_NO_PATHCONV=1` to prevent Git Bash from converting the subject path.
+
 ```bash
 mkdir -p certs
 
 # Generate a CA key and self-signed CA certificate
 openssl genrsa -out certs/ca.key 4096
-openssl req -x509 -new -nodes -key certs/ca.key -sha256 -days 1825 \
+MSYS_NO_PATHCONV=1 openssl req -x509 -new -nodes -key certs/ca.key -sha256 -days 1825 \
   -out certs/ca.crt -subj "/CN=LocalDevCA"
 
 # Generate a server key and certificate signing request
 openssl genrsa -out certs/servicecontrol.key 2048
-openssl req -new -key certs/servicecontrol.key -out certs/servicecontrol.csr \
+MSYS_NO_PATHCONV=1 openssl req -new -key certs/servicecontrol.key -out certs/servicecontrol.csr \
   -subj "/CN=localhost"
+
+# Write the required SANs to a config file — run each echo separately
+echo "[ext]" > /tmp/san.cnf
+echo "subjectAltName=DNS:localhost,DNS:servicecontrol,DNS:servicecontrol-audit,DNS:servicecontrol-monitoring,IP:127.0.0.1" >> /tmp/san.cnf
 
 # Sign the server cert with the CA, including all required SANs
 openssl x509 -req -in certs/servicecontrol.csr \
   -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial \
   -out certs/servicecontrol.crt -days 730 -sha256 \
-  -addext "subjectAltName=DNS:localhost,DNS:servicecontrol,DNS:servicecontrol-audit,DNS:servicecontrol-monitoring,IP:127.0.0.1,IP:::1"
+  -extfile /tmp/san.cnf -extensions ext
 
 # Bundle into a PFX (password: "password")
 openssl pkcs12 -export -out certs/servicecontrol.pfx \
