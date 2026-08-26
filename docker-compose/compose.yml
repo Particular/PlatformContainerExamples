@@ -1,6 +1,17 @@
 name: service-platform
 
 services:
+  # One-shot init container that fixes ownership/permissions on the shared
+  # Learning Transport volume. The ServiceControl images run as a non-root
+  # user, and Docker creates named volumes owned by root by default, which
+  # causes UnauthorizedAccessException when the app tries to create its
+  # queue directories. This runs once, chmods the volume, then exits.
+  learningtransport-init:
+    image: busybox
+    command: ["sh", "-c", "mkdir -p /learningtransport && chmod -R 0777 /learningtransport"]
+    volumes:
+      - learningtransport:/learningtransport
+
   servicecontrol:
     image: particular/servicecontrol:${SERVICECONTROL_TAG}
     env_file: .env
@@ -16,6 +27,8 @@ services:
     depends_on:
       servicecontrol-db:
         condition: service_healthy
+      learningtransport-init:
+        condition: service_completed_successfully
 
   # WARNING: A single database container should not be shared between multiple ServiceControl instances in production scenarios.
   servicecontrol-db:
@@ -41,6 +54,8 @@ services:
     depends_on:
       servicecontrol-db:
         condition: service_healthy
+      learningtransport-init:
+        condition: service_completed_successfully
 
   servicecontrol-monitoring:
     image: particular/servicecontrol-monitoring:${SERVICECONTROL_TAG}
@@ -51,6 +66,9 @@ services:
       - "33633:33633"
     volumes:
       - learningtransport:/learningtransport
+    depends_on:
+      learningtransport-init:
+        condition: service_completed_successfully
 
   servicepulse:
     image: particular/servicepulse:${SERVICEPULSE_TAG}
@@ -92,6 +110,8 @@ services:
         condition: service_started
       servicecontrol-monitoring:
         condition: service_started
+      learningtransport-init:
+        condition: service_completed_successfully
 
 volumes:
   raven-config:
