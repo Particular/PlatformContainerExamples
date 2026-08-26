@@ -11,10 +11,10 @@ services:
       REMOTEINSTANCES: '[{"api_uri":"http://servicecontrol-audit:44444/api"}]'
     command: --setup-and-run
     restart: unless-stopped
+    volumes:
+      - learningtransport:/learningtransport
     depends_on:
       servicecontrol-db:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
 
   # WARNING: A single database container should not be shared between multiple ServiceControl instances in production scenarios.
@@ -36,10 +36,10 @@ services:
       SERVICECONTROLQUEUEADDRESS: Particular.ServiceControl
     command: --setup-and-run
     restart: unless-stopped
+    volumes:
+      - learningtransport:/learningtransport
     depends_on:
       servicecontrol-db:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
 
   servicecontrol-monitoring:
@@ -49,9 +49,8 @@ services:
     command: --setup-and-run
     ports:
       - "33633:33633"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+    volumes:
+      - learningtransport:/learningtransport
 
   servicepulse:
     image: particular/servicepulse:${SERVICEPULSE_TAG}
@@ -66,26 +65,8 @@ services:
         condition: service_healthy
       servicecontrol-monitoring:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    restart: unless-stopped
-    healthcheck:
-      test: rabbitmq-diagnostics check_port_connectivity
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      start_interval: 10s
-      retries: 3
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
 
 volumes:
-  rabbitmq-data:
   raven-config:
   raven-data:
+  learningtransport:
