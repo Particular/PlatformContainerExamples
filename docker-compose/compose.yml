@@ -66,7 +66,7 @@ services:
       servicecontrol-monitoring:
         condition: service_healthy
 
-  # Containerized ServiceControl.SmokeTest, built from source (see smoketest/Dockerfile).
+  # Containerized ServiceControl.SmokeTest (see smoketest/Dockerfile).
   # Preconfigured to share the same Learning Transport volume used by ServiceControl,
   # so a user can exec into it and run the tool's `learning-transport` command against
   # the same storage directory. No image is pushed to a registry; it's built locally
@@ -79,9 +79,19 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "which", "servicecontrol-smoketest"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
     depends_on:
       servicecontrol:
         condition: service_healthy
+      servicecontrol-audit:
+        condition: service_started
+      servicecontrol-monitoring:
+        condition: service_started
 
 volumes:
   raven-config:
