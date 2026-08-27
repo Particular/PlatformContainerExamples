@@ -3,20 +3,38 @@
 # Cross-platform: works with PowerShell Core (pwsh) on Windows, macOS, and Linux.
 #
 # What it does:
-#   1. Pulls the latest images for all services that use a published image.
-#   2. Builds and starts all containers (ServiceControl, Audit, Monitoring, ServicePulse,
+#   1. Validates the requested ServiceControl / ServicePulse versions (if any) against
+#      what's actually published in the registry. Defaults to "latest" when omitted.
+#   2. Pulls the images for all services that use a published image.
+#   3. Builds and starts all containers (ServiceControl, Audit, Monitoring, ServicePulse,
 #      RavenDB, and the containerized SmokeTest tool), waiting until they report healthy.
-#   3. Opens ServicePulse in your default host browser.
-#   4. Drops you straight into an interactive session of the SmokeTest tool, preconfigured
+#   4. Opens ServicePulse in your default host browser.
+#   5. Drops you straight into an interactive session of the SmokeTest tool, preconfigured
 #      to use the shared Learning Transport folder, ready to send test messages.
 #
 # Usage:
 #   pwsh ./run.ps1
-#   (or, if made executable on macOS/Linux: ./run.ps1)
+#   pwsh ./run.ps1 -ServiceControlVersion 6.6.1 -ServicePulseVersion 2.3.1
+#   pwsh ./run.ps1 -ServiceControlVersion 6.6.1-beta.3
+#
+# Parameters:
+#   -ServiceControlVersion  Tag to use for ServiceControl, ServiceControl.Audit,
+#                           ServiceControl.Monitoring, and the matching RavenDB image.
+#                           Any tag accepted by the registry is valid (semantic or not,
+#                           e.g. a beta/RC/date-based build). Defaults to "latest".
+#   -ServicePulseVersion    Tag to use for ServicePulse. Same rules as above.
+#                           Defaults to "latest".
 #
 # Requirements:
 #   - PowerShell Core (pwsh) - https://aka.ms/powershell
 #   - Docker and Docker Compose v2 (the `docker compose` CLI plugin)
+#   - Network access to Docker Hub, to validate the requested tags exist
+
+[CmdletBinding()]
+param(
+    [string]$ServiceControlVersion = 'latest',
+    [string]$ServicePulseVersion = 'latest'
+)
 
 $ErrorActionPreference = 'Stop'
 
@@ -25,7 +43,66 @@ Set-Location $ScriptDir
 
 $ServicePulseUrl = 'http://localhost:9090'
 
-Write-Host '==> Pulling latest images...'
+function Test-ImageTagPublished {
+    param(
+        [string]$Repository,   # e.g. "particular/servicecontrol"
+        [string]$Tag
+    )
+
+    $uri = "https://hub.docker.com/v2/repositories/$Repository/tags/$Tag"
+    try {
+        $null = Invoke-RestMethod -Uri $uri -Method Get -ErrorAction Stop
+        return $true
+    }
+    catch {
+        $statusCode = $null
+        if ($_.Exception.Response) {
+            $statusCode = [int]$_.Exception.Response.StatusCode
+        }
+        if ($statusCode -eq 404) {
+            return $false
+        }
+        # Network error, registry unreachable, or another unexpected failure.
+        throw "Could not reach the image registry to validate tag '$Tag' for '$Repository': $_"
+    }
+}
+
+function Assert-VersionAvailable {
+    param(
+        [string]$Repository,
+        [string]$Tag,
+        [string]$FriendlyName
+    )
+
+    Write-Host "==> Checking that $FriendlyName version '$Tag' is published..."
+
+    if ($Tag -eq 'latest') {
+        if (-not (Test-ImageTagPublished -Repository $Repository -Tag 'latest')) {
+            Write-Error "No published versions were found for $FriendlyName ($Repository). Nothing has been deployed."
+            exit 1
+        }
+        return
+    }
+
+    if (-not (Test-ImageTagPublished -Repository $Repository -Tag $Tag)) {
+        Write-Error "$FriendlyName version '$Tag' was not found in the image registry ($Repository). Nothing has been deployed."
+        exit 1
+    }
+}
+
+Assert-VersionAvailable -Repository 'particular/servicecontrol' -Tag $ServiceControlVersion -FriendlyName 'ServiceControl'
+Assert-VersionAvailable -Repository 'particular/servicepulse' -Tag $ServicePulseVersion -FriendlyName 'ServicePulse'
+
+# The RavenDB image version always tracks the ServiceControl version (compose.yml
+# already references particular/servicecontrol-ravendb:${SERVICECONTROL_TAG}), so
+# no separate user-facing parameter or validation is needed for it.
+$env:SERVICECONTROL_TAG = $ServiceControlVersion
+$env:SERVICEPULSE_TAG = $ServicePulseVersion
+
+Write-Host "==> Using ServiceControl version: $ServiceControlVersion"
+Write-Host "==> Using ServicePulse version: $ServicePulseVersion"
+
+Write-Host '==> Pulling images...'
 docker compose pull
 if ($LASTEXITCODE -ne 0) {
     Write-Error 'docker compose pull failed. See output above for details.'
