@@ -1,0 +1,6 @@
+# Learning Transport message/queue files
+# This directory is bind-mounted into the ServiceControl, Audit, Monitoring,
+# and SmokeTest containers so you can inspect message files on the host for
+# debugging. Ignore its contents but keep the directory tracked.
+*
+!.gitignore

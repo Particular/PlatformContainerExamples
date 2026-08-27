@@ -2,15 +2,16 @@ name: service-platform
 
 services:
   # One-shot init container that fixes ownership/permissions on the shared
-  # Learning Transport volume. The ServiceControl images run as a non-root
-  # user, and Docker creates named volumes owned by root by default, which
-  # causes UnauthorizedAccessException when the app tries to create its
-  # queue directories. This runs once, chmods the volume, then exits.
+  # Learning Transport folder. The ServiceControl images run as a non-root
+  # user, and a fresh bind-mounted host directory may not be writable by
+  # that user depending on host OS/umask, which causes
+  # UnauthorizedAccessException when the app tries to create its queue
+  # directories. This runs once, chmods the folder, then exits.
   learningtransport-init:
     image: busybox
     command: ["sh", "-c", "mkdir -p /learningtransport && chmod -R 0777 /learningtransport"]
     volumes:
-      - learningtransport:/learningtransport
+      - ./learningtransport:/learningtransport
 
   servicecontrol:
     image: particular/servicecontrol:${SERVICECONTROL_TAG}
@@ -23,7 +24,7 @@ services:
     command: --setup-and-run
     restart: unless-stopped
     volumes:
-      - learningtransport:/learningtransport
+      - ./learningtransport:/learningtransport
     depends_on:
       servicecontrol-db:
         condition: service_healthy
@@ -50,7 +51,7 @@ services:
     command: --setup-and-run
     restart: unless-stopped
     volumes:
-      - learningtransport:/learningtransport
+      - ./learningtransport:/learningtransport
     depends_on:
       servicecontrol-db:
         condition: service_healthy
@@ -65,7 +66,7 @@ services:
     ports:
       - "33633:33633"
     volumes:
-      - learningtransport:/learningtransport
+      - ./learningtransport:/learningtransport
     depends_on:
       learningtransport-init:
         condition: service_completed_successfully
@@ -85,7 +86,7 @@ services:
         condition: service_healthy
 
   # Containerized ServiceControl.SmokeTest (see smoketest/Dockerfile).
-  # Preconfigured to share the same Learning Transport volume used by ServiceControl,
+  # Preconfigured to share the same Learning Transport folder used by ServiceControl,
   # so a user can exec into it and run the tool's `learning-transport` command against
   # the same storage directory. No image is pushed to a registry; it's built locally
   # by `docker compose build` / `docker compose up`.
@@ -93,7 +94,7 @@ services:
     build:
       context: ./smoketest
     volumes:
-      - learningtransport:/learningtransport
+      - ./learningtransport:/learningtransport
     stdin_open: true
     tty: true
     restart: unless-stopped
@@ -116,4 +117,3 @@ services:
 volumes:
   raven-config:
   raven-data:
-  learningtransport:
