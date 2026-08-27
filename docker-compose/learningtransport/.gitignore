@@ -1,6 +1,9 @@
 # Learning Transport message/queue files
 # This directory is bind-mounted into the ServiceControl, Audit, Monitoring,
 # and SmokeTest containers so you can inspect message files on the host for
-# debugging. Ignore its contents but keep the directory tracked.
+# debugging. Ignore its contents (including the .learningtransport data
+# folder created by NServiceBus) but keep this directory tracked.
 *
 !.gitignore
+.DS_Store
+.learningtransport/
