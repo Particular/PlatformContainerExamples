@@ -11,6 +11,9 @@
 #   4. Opens ServicePulse in your default host browser.
 #   5. Drops you straight into an interactive session of the SmokeTest tool, preconfigured
 #      to use the shared Learning Transport folder, ready to send test messages.
+#   6. When the SmokeTest session ends (q/quit/exit), tears everything down: stops and
+#      removes all containers/volumes (`docker compose down -v`) and deletes the
+#      bind-mounted `learningtransport` folder, so every run starts from a clean slate.
 #
 # Usage:
 #   pwsh ./run.ps1
@@ -42,6 +45,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 
 $ServicePulseUrl = 'http://localhost:9090'
+$LearningTransportPath = Join-Path $ScriptDir 'learningtransport'
 
 function Test-ImageTagPublished {
     param(
@@ -157,3 +161,16 @@ Write-Host "==> Type 'q', 'quit', or 'exit' inside the tool to leave the interac
 Start-Sleep -Seconds 1
 
 docker compose exec -it smoketest servicecontrol-smoketest learning-transport /learningtransport
+
+Write-Host '==> SmokeTest session ended. Tearing down the stack...'
+docker compose down -v
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning 'docker compose down failed. You may need to run "docker compose down -v" manually.'
+}
+
+if (Test-Path $LearningTransportPath) {
+    Write-Host "==> Removing learning transport folder at $LearningTransportPath..."
+    Remove-Item -Path $LearningTransportPath -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+Write-Host '==> Done. All containers, volumes, and the learningtransport folder have been removed.'
